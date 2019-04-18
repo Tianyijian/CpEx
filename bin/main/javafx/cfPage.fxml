@@ -26,8 +26,13 @@
       <TextArea fx:id="ta_console" layoutX="765.0" layoutY="365.0" prefHeight="230.0" prefWidth="400.0" />
       <TableView fx:id="tv_fhb" layoutX="45.0" layoutY="365.0" prefHeight="230.0" prefWidth="400.0">
         <columns>
-          <TableColumn prefWidth="75.0" text="C1" />
-          <TableColumn prefWidth="75.0" text="C2" />
+          <TableColumn fx:id="tc_symbol_index" prefWidth="40.0" text="序号" />
+          <TableColumn fx:id="tc_symbol_name" prefWidth="60.0" text="名字" />
+            <TableColumn fx:id="tc_symbol_type" prefWidth="60.0" text="符号种类" />
+            <TableColumn fx:id="tc_symbol_attribute" prefWidth="60.0" text="类型" />
+            <TableColumn fx:id="tc_symbol_value" prefWidth="60.0" text="值" />
+            <TableColumn fx:id="tc_symbol_addr" prefWidth="60.0" text="地址" />
+            <TableColumn fx:id="tc_symbol_extend" prefWidth="60.0" text="扩展属性" />
         </columns>
       </TableView>
       <Label layoutX="45.0" layoutY="341.0" text="符号表：" />

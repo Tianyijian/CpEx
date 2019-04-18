@@ -6,7 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,9 +24,9 @@ public class LexicalAnalysis {
 	private int index; // 读取到的下标
 	private List<Integer> lineNum = new ArrayList<>(); // 存储每行的字符数
 	private StringBuffer res = new StringBuffer(); // 存储结果
-	private Map<String, String> fhb = new HashMap<String, String>(); // 符号表
 	private StringBuilder console = new StringBuilder(); // 存储打印信息
-
+	private Map<String, SymbolTable> symbolTable = new LinkedHashMap<String, SymbolTable>();	// 符号表
+	
 	/**
 	 * 传入待分析的代码串，并进行分析
 	 * 
@@ -130,11 +130,29 @@ public class LexicalAnalysis {
 		if (isGjz(word.toString())) {
 			res.append("(" + zbm.indexOf(word.toString()) + ", 0)\n");
 		} else {
-			if (fhb.get(word.toString()) == null) { // 判断是否在符号表,不在则加入符号表
-				fhb.put(word.toString(), "");
+			int r = lookupSymbolTable(word.toString());
+			if (r == -1) { // 判断是否在符号表,不在则加入符号表
+				SymbolTable st = new SymbolTable(symbolTable.size() + 1 + "", word.toString(), "变量");
+				symbolTable.put(word.toString(), st);
+				res.append("(" + zbm.indexOf("bsf") + ", STIndex: " + symbolTable.size()+")\n");
+			} else {
+				res.append("(" + zbm.indexOf("bsf") + ", STIndex: " + r + ")\n");
 			}
-			res.append("(" + zbm.indexOf("bsf") + ", " + word.toString() + "符号表入口)\n");
+
 		}
+	}
+
+	/**
+	 * 查找符号表
+	 * 
+	 * @param symbol
+	 * @return 不存在该符号返回-1， 存在返回其index
+	 */
+	private int lookupSymbolTable(String symbol) {
+		if (symbolTable.containsKey(symbol)) {
+			return Integer.valueOf(symbolTable.get(symbol).getIndex());
+		}
+		return -1;
 	}
 
 	/**
@@ -343,6 +361,19 @@ public class LexicalAnalysis {
 		for (int i = 0; i < zbm.size(); i++) {
 			BianMa bianMa = new BianMa(i + "", zbm.get(i));
 			res.add(bianMa);
+		}
+		return res;
+	}
+
+	/**
+	 * 返回符号表
+	 * 
+	 * @return
+	 */
+	public List<SymbolTable> getSymbolTables() {
+		List<SymbolTable> res = new ArrayList<SymbolTable>();
+		for (String key : symbolTable.keySet()) {
+			res.add(symbolTable.get(key));
 		}
 		return res;
 	}
