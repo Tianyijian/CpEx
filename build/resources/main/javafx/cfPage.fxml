@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.StackPane?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafx.CFPageController">
+   <children>
+      <TableView fx:id="tv_bm" layoutX="570.0" layoutY="45.0" prefHeight="368.0" prefWidth="151.0">
+        <columns>
+            <TableColumn fx:id="tc_dcmc" prefWidth="77.0" text="单词名称" />
+          <TableColumn fx:id="tc_lbbm" prefWidth="73.0" text="类别编码" />
+        </columns>
+      </TableView>
+      <TextArea fx:id="ta_input" layoutX="53.0" layoutY="45.0" prefHeight="118.0" prefWidth="328.0" />
+      <Button fx:id="btn_read_from_file" layoutX="425.0" layoutY="55.0" mnemonicParsing="false" onAction="#chooseFile" prefHeight="15.0" prefWidth="64.0" text="导入文件" />
+      <Button fx:id="btn_cffx" layoutX="425.0" layoutY="93.0" mnemonicParsing="false" onAction="#cffx" prefHeight="15.0" prefWidth="64.0" text="词法分析" />
+      <TextArea fx:id="ta_result" layoutX="53.0" layoutY="214.0" prefHeight="198.0" prefWidth="328.0" />
+      <Label layoutX="53.0" layoutY="192.0" text="分析结果：" />
+      <Label layoutX="53.0" layoutY="21.0" text="代码输入：" />
+      <Button fx:id="btn_clear" layoutX="425.0" layoutY="131.0" mnemonicParsing="false" onAction="#clear" prefHeight="15.0" prefWidth="64.0" text="清空" />
+      <Label layoutX="570.0" layoutY="21.0" text="种别码表：" />
+   </children>
+</AnchorPane>

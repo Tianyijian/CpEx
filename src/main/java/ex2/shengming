@@ -1,0 +1,4 @@
+D -> D D | proc id ; D S | T id;             
+T -> X C |  record D                        
+X -> integer | real                 
+C -> [num]C | ε 
