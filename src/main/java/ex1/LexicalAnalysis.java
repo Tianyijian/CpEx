@@ -9,28 +9,29 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
 import javafx.BianMa;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-
 public class LexicalAnalysis {
 	// 种别码， 按单词特性编码
-	private List<String> zbm = Arrays.asList("error", "bsf", "uint", "ufloat", "bool", "str", "for", "do", "if", "else", "then", // 0~10
-			"true", "false", "int", "float", "boolean", "while", "(", ")", "{", "}", "[", "]", ",", ";", "+", "-", "*", "=", ">", "<", "!", 
-			"&", "|", ">=", "==", "<=", "!=", "+=", "-=", "*=", "++", "&&", "||", "--"); 
+	private List<String> zbm = Arrays.asList("error", "bsf", "uint", "ufloat", "bool", "str", "for", "do", "if", "else",
+			"then", "true", "false", "int", "float", "boolean", "while", "(", ")", "{", "}", "[", "]", ",", ";", "+",
+			"-", "*", "=", ">", "<", "!", "&", "|", ">=", "==", "<=", "!=", "+=", "-=", "*=", "++", "&&", "||", "--");
 
 	private String content; // 要识别的内容
 	private int index; // 读取到的下标
 	private List<Integer> lineNum = new ArrayList<>(); // 存储每行的字符数
 	private StringBuffer res = new StringBuffer(); // 存储结果
-	private Map<String, String> fhb = new HashMap<String, String>();	// 符号表
-	private Stack<Integer> xkhStack = new Stack<Integer>();
-	private Stack<Integer> dkhStack = new Stack<Integer>();
-	private Stack<Integer> zkhStack = new Stack<Integer>();
-	
+	private Map<String, String> fhb = new HashMap<String, String>(); // 符号表
+	private StringBuilder console = new StringBuilder(); // 存储打印信息
+
+	/**
+	 * 传入待分析的代码串，并进行分析
+	 * 
+	 * @param content
+	 */
 	public LexicalAnalysis(String content) {
 		this.content = content;
 		sortChar();
@@ -40,13 +41,22 @@ public class LexicalAnalysis {
 		super();
 	}
 
+	/**
+	 * 用于直接测试
+	 * 
+	 * @param args
+	 */
 	public static void main(String[] args) {
-		// String filename = "src/ex1/test1";
-		String filename = "src/main/java/ex1/test3";
+		String filename = "src/main/java/ex1/cftest.txt";
 		new LexicalAnalysis().scan(filename);
+
 	}
 
-
+	/**
+	 * 从文件读入待分析代码
+	 * 
+	 * @param filename
+	 */
 	private void scan(String filename) {
 		try {
 			File file = new File(filename);
@@ -56,16 +66,13 @@ public class LexicalAnalysis {
 			in.read(bytes);
 			in.close();
 			content = new String(bytes);
-			System.out.println("content: " + content);
-			sortChar();
-			System.out.println(res.toString());
-			for (int n : lineNum) {
-				System.out.print(n + " ");
-			}
+			System.out.println("content: \n\n" + content);
+			sortChar(); // 开始分析
+			System.out.println("result: \n\n" + getResult()); // 打印结果
+			System.out.println("console: \n\n" + getConsole()); // 打印控制台信息
 		} catch (FileNotFoundException e) {
 			System.err.println("FileNotFound: " + filename);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -79,7 +86,6 @@ public class LexicalAnalysis {
 		while (true) {
 			if (index >= content.length()) {
 				recordLine();
-				checkClosed();
 				break;
 			}
 			char ch = content.charAt(index);
@@ -90,16 +96,15 @@ public class LexicalAnalysis {
 				recogDig(); // 识别数字
 			} else if (ch == '/') {
 				recogCom(); // 识别注释
-			} else if (ch == ' ') {
+			} else if (ch == ' ') { // 空格
 				index++;
 			} else if (isDel(ch)) {
 				recogDel(); // 识别界限符
-			} else if (ch == '\r') { // 换行符
+			} else if (ch == '\r') { // 换行符 \r\n
 				recordLine(); // 记录行的字符数
-			} else if (ch == '\n') {
+			} else if (ch == '\n') { // 换行符 \n
 				recordLine2();
-			}
-			else {
+			} else { // 错误字符，向后处理
 				error();
 				index++; // 继续向后处理
 			}
@@ -125,10 +130,10 @@ public class LexicalAnalysis {
 		if (isGjz(word.toString())) {
 			res.append("(" + zbm.indexOf(word.toString()) + ", 0)\n");
 		} else {
-			if (fhb.get(word.toString()) == null) {		//判断是否在符号表,不在则加入符号表
+			if (fhb.get(word.toString()) == null) { // 判断是否在符号表,不在则加入符号表
 				fhb.put(word.toString(), "");
-			} 
-			res.append("(" + zbm.indexOf("bsf") + ", "+ word.toString() + "符号表入口)\n");
+			}
+			res.append("(" + zbm.indexOf("bsf") + ", " + word.toString() + "符号表入口)\n");
 		}
 	}
 
@@ -166,9 +171,9 @@ public class LexicalAnalysis {
 		}
 		StringBuffer sb = new StringBuffer();
 		while (true) {
-			index ++;
+			index++;
 			if (index >= content.length()) {
-				System.err.println("Comment not end: " + sb.toString());
+				console.append("Comment not end: " + sb.toString() + "\n");
 				return;
 			}
 			ch = content.charAt(index);
@@ -177,7 +182,7 @@ public class LexicalAnalysis {
 					char ch1 = content.charAt(index + 1);
 					if (ch1 == '/') {
 						index += 2;
-						System.out.println("Comment: " + sb.toString());
+						console.append("Comment: " + sb.toString() + "\n");
 						return;
 					}
 				}
@@ -209,45 +214,6 @@ public class LexicalAnalysis {
 				}
 
 			}
-			switch (ch) {
-			case '(':
-				xkhStack.push(index);
-				break;
-			case ')':
-				if (xkhStack.empty()) {
-					index++;
-					System.err.printf("括号未封闭:  (%d row, %d col)\n", (lineNum.size() + 1), getColNumByIndex(index));
-					return;
-				}
-				xkhStack.pop();
-				break;
-			case '{':
-				dkhStack.push(index);
-				break;
-			case '}':
-				if (dkhStack.empty()) {
-					index++;
-					System.err.printf("括号未封闭:  (%d row, %d col)\n", (lineNum.size() + 1), getColNumByIndex(index));
-					return;
-				}
-				dkhStack.pop();
-				break;
-			case '[':
-				zkhStack.push(index);
-				break;
-			case ']':
-				if (zkhStack.empty()) {
-					index++;
-					System.err.printf("括号未封闭:  (%d row, %d col)\n", (lineNum.size() + 1), getColNumByIndex(index));
-					return;
-				}
-				zkhStack.pop();
-				break;
-			default:
-				break;
-			}
-				
-			
 			if (ch == '!') {
 				error();
 			}
@@ -257,20 +223,6 @@ public class LexicalAnalysis {
 
 	}
 
-	/**
-	    *   检查括号封闭性
-	 */
-	private void checkClosed() {
-		while (!xkhStack.empty()) {
-			System.err.printf("括号未封闭:  (%d row, %d col)\n", (lineNum.size() + 1), getColNumByIndex(xkhStack.pop()));
-		}
-		while (!zkhStack.empty()) {
-			System.err.printf("括号未封闭:  (%d row, %d col)\n", (lineNum.size() + 1), getColNumByIndex(zkhStack.pop()));
-		}
-		while (!dkhStack.empty()) {
-			System.err.printf("括号未封闭:  (%d row, %d col)\n", (lineNum.size() + 1), getColNumByIndex(dkhStack.pop()));
-		}
-	}
 	/**
 	 * 判断是否是关键字
 	 * 
@@ -335,9 +287,8 @@ public class LexicalAnalysis {
 		return false;
 	}
 
-
 	/**
-	 * 记录一行的字符数
+	 * 记录一行的字符数 换行符为 \r\n
 	 */
 	private void recordLine() {
 		int sum = 0;
@@ -349,16 +300,19 @@ public class LexicalAnalysis {
 	}
 
 	/**
-	 * 记录一行的字符数
+	 * 记录一行的字符数 换行符为 \n
 	 */
 	private void recordLine2() {
-		int sum = 0;
-		for (int i = 0; i < lineNum.size(); i++) {
-			sum += lineNum.get(i) + 1;
-		}
-		lineNum.add(index - sum);
+		lineNum.add(getColNumByIndex(index));
 		index += 1;
 	}
+
+	/**
+	 * 通过index 获得当前列号，换行符为 \n
+	 * 
+	 * @param index
+	 * @return
+	 */
 	private int getColNumByIndex(int index) {
 		int sum = 0;
 		for (int i = 0; i < lineNum.size(); i++) {
@@ -366,8 +320,9 @@ public class LexicalAnalysis {
 		}
 		return index - sum;
 	}
+
 	/**
-	 * 	错误处理，输出错误字符
+	 * 错误处理，输出错误字符的位置
 	 */
 	private void error() {
 		int line = lineNum.size() + 1;
@@ -375,25 +330,38 @@ public class LexicalAnalysis {
 		for (int i = 0; i < lineNum.size(); i++) {
 			sum += lineNum.get(i) + 1;
 		}
-		System.err.printf("illegal char: (%d row, %d col)\n", line, index + 1 - sum);
+		console.append("illegal char: (%d row, %d col)\n", line, index + 1 - sum);
 	}
-	
-	/** 返回种别码给界面
+
+	/**
+	 * 返回种别码给界面
+	 * 
 	 * @return
 	 */
 	public ObservableList<BianMa> getBianMa() {
 		ObservableList<BianMa> res = FXCollections.observableArrayList();
 		for (int i = 0; i < zbm.size(); i++) {
-			BianMa bianMa = new BianMa(i+"", zbm.get(i));
+			BianMa bianMa = new BianMa(i + "", zbm.get(i));
 			res.add(bianMa);
 		}
 		return res;
 	}
-	
-	/** 返回分析结果
+
+	/**
+	 * 返回分析结果
+	 * 
 	 * @return
 	 */
 	public String getResult() {
-		return res.toString(); 
+		return res.toString();
+	}
+
+	/**
+	 * 返回控制台打印信息
+	 * 
+	 * @return
+	 */
+	public String getConsole() {
+		return console.toString();
 	}
 }

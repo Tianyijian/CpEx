@@ -12,6 +12,7 @@ public class Constant {
 	/**将文法中的终结符转换为单字符表示的终结符
 	 * 
 	 */
+	@SuppressWarnings("serial")
 	public  static Map<String, String> grammarTable = new LinkedHashMap<String, String>(){{
 		put("id", "i");
 		put("digit", "d");

@@ -17,6 +17,12 @@ public class CFPageController implements Initializable{
 	@FXML
 	private Button btn_read_from_file, btn_cffx, btn_cffx1, btn_cffx2, btn_clear;
 	
+    @FXML
+    private TextArea ta_console;
+
+    @FXML
+    private TableView<?> tv_fhb;
+    
 	@FXML
 	private TextArea ta_input;
 	
@@ -38,23 +44,20 @@ public class CFPageController implements Initializable{
 		tc_dcmc.setCellValueFactory(CellData -> CellData.getValue().name());
 		tv_bm.setItems(new LexicalAnalysis().getBianMa());
 	}
-	@FXML
-	public void chooseFile(ActionEvent event) {
-//		DirectoryChooser directoryChooser = new DirectoryChooser();
-//		File file = directoryChooser.showDialog(stage);
-//		System.out.println(file.getPath());
-	}
+
 	@FXML
 	public void cffx(ActionEvent event) {
 		if (ta_input.getText().equals("")) {
-			ta_result.setText("输入不能为空！");
+			ta_console.setText("输入不能为空！");
 			return;
 		}
 		
 		String content = ta_input.getText();
 //		System.out.println("content:" + content+ "--");
-		String res = new LexicalAnalysis(content).getResult();
+		LexicalAnalysis la = new LexicalAnalysis(content);
+		String res = la.getResult();
 		ta_result.setText(res);
+		ta_console.setText(la.getConsole());
 	}
 	@FXML
 	public void clear() {

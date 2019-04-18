@@ -6,21 +6,30 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.StackPane?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafx.CFPageController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="620.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafx.CFPageController">
    <children>
-      <TableView fx:id="tv_bm" layoutX="570.0" layoutY="45.0" prefHeight="368.0" prefWidth="151.0">
+      <TableView fx:id="tv_bm" layoutX="520.0" layoutY="75.0" prefHeight="520.0" prefWidth="168.0">
         <columns>
-            <TableColumn fx:id="tc_dcmc" prefWidth="77.0" text="单词名称" />
-          <TableColumn fx:id="tc_lbbm" prefWidth="73.0" text="类别编码" />
+            <TableColumn fx:id="tc_dcmc" prefWidth="75.0" text="单词名称" />
+          <TableColumn fx:id="tc_lbbm" prefWidth="75.0" text="类别编码" />
         </columns>
       </TableView>
-      <TextArea fx:id="ta_input" layoutX="53.0" layoutY="45.0" prefHeight="118.0" prefWidth="328.0" />
-      <Button fx:id="btn_read_from_file" layoutX="425.0" layoutY="55.0" mnemonicParsing="false" onAction="#chooseFile" prefHeight="15.0" prefWidth="64.0" text="导入文件" />
-      <Button fx:id="btn_cffx" layoutX="425.0" layoutY="93.0" mnemonicParsing="false" onAction="#cffx" prefHeight="15.0" prefWidth="64.0" text="词法分析" />
-      <TextArea fx:id="ta_result" layoutX="53.0" layoutY="214.0" prefHeight="198.0" prefWidth="328.0" />
-      <Label layoutX="53.0" layoutY="192.0" text="分析结果：" />
-      <Label layoutX="53.0" layoutY="21.0" text="代码输入：" />
-      <Button fx:id="btn_clear" layoutX="425.0" layoutY="131.0" mnemonicParsing="false" onAction="#clear" prefHeight="15.0" prefWidth="64.0" text="清空" />
-      <Label layoutX="570.0" layoutY="21.0" text="种别码表：" />
+      <TextArea fx:id="ta_input" layoutX="45.0" layoutY="75.0" prefHeight="230.0" prefWidth="400.0" />
+      <Button fx:id="btn_read_from_file" layoutX="470.0" layoutY="15.0" mnemonicParsing="false" prefHeight="20.0" prefWidth="80.0" text="导入文件" />
+      <Button fx:id="btn_cffx" layoutX="560.0" layoutY="15.0" mnemonicParsing="false" onAction="#cffx" prefHeight="20.0" prefWidth="80.0" text="词法分析" />
+      <TextArea fx:id="ta_result" layoutX="765.0" layoutY="75.0" prefHeight="230.0" prefWidth="400.0" />
+      <Label layoutX="767.0" layoutY="54.0" text="分析结果：" />
+      <Label layoutX="45.0" layoutY="54.0" text="代码输入：" />
+      <Button fx:id="btn_clear" layoutX="650.0" layoutY="15.0" mnemonicParsing="false" onAction="#clear" prefHeight="20.0" prefWidth="80.0" text="清空" />
+      <Label layoutX="525.0" layoutY="54.0" text="种别码表：" />
+      <Label layoutX="769.0" layoutY="341.0" text="打印信息：" />
+      <TextArea fx:id="ta_console" layoutX="765.0" layoutY="365.0" prefHeight="230.0" prefWidth="400.0" />
+      <TableView fx:id="tv_fhb" layoutX="45.0" layoutY="365.0" prefHeight="230.0" prefWidth="400.0">
+        <columns>
+          <TableColumn prefWidth="75.0" text="C1" />
+          <TableColumn prefWidth="75.0" text="C2" />
+        </columns>
+      </TableView>
+      <Label layoutX="45.0" layoutY="341.0" text="符号表：" />
    </children>
 </AnchorPane>
