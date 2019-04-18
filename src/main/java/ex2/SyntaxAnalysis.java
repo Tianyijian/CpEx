@@ -25,7 +25,8 @@ public class SyntaxAnalysis {
 	private Map<String, String> Go = new LinkedHashMap<String, String>();// 转移函数
 	private String[][] ACTION;
 	private int[][] GOTO;
-	private List<AnalysisState> analysisStates = new ArrayList<AnalysisState>();	//记录语法分析状态
+	private List<AnalysisState> analysisStates = new ArrayList<AnalysisState>(); // 记录语法分析状态
+
 	/**
 	 * 从文件读入文法
 	 * 
@@ -48,7 +49,36 @@ public class SyntaxAnalysis {
 			e.printStackTrace();
 		}
 	}
-	/**对文法的终结符进行转换,多个字符转换为单字符
+
+	/**
+	 * 读入词法分析的token文件，返回输入字符串
+	 * 
+	 * @param content
+	 * @return
+	 */
+	public static String readToken(String content) {
+		StringBuilder res = new StringBuilder();
+		List<String> zbm = Constant.zbm;
+		Map<String, String> grammarMap = Constant.grammarTable;
+		String[] str = content.split("\n");
+		System.out.println(str.length);
+		for (int i = 0; i < str.length;i++) {
+			String s = str[i];
+			String key = zbm.get(Integer.valueOf(s.substring(1, s.indexOf(","))));
+			if (grammarMap.containsKey(key)) {
+				res.append(grammarMap.get(key));
+			} else if (key.equals("uint") || key.equals("ureal")) {
+				res.append(grammarMap.get("digit"));
+			} else {
+				res.append(key);
+			}
+		}
+		return res.toString();
+	}
+
+	/**
+	 * 对文法的终结符进行转换,多个字符转换为单字符
+	 * 
 	 * @return
 	 */
 	private String gVT(String content) {
@@ -57,6 +87,7 @@ public class SyntaxAnalysis {
 		}
 		return content;
 	}
+
 	/**
 	 * 获取终结符和非终结符
 	 */
@@ -237,8 +268,7 @@ public class SyntaxAnalysis {
 				res.add(s.charAt(j));
 			}
 		}
-		res.remove(new Character('ε'));
-//		res.re
+		res.remove(Character.valueOf('ε'));
 		return res;
 	}
 
@@ -310,12 +340,13 @@ public class SyntaxAnalysis {
 		buffer.add('#');
 		stateStack.push(0);
 		signStack.push('#');
-		int step=1;
+		int step = 1;
 		while (true) {
 			int s = stateStack.peek(); // 栈顶状态
 			char a = buffer.peek(); // 缓冲区首字符
 			String op = ACTION[s][VT.indexOf(a)];
-			AnalysisState state = new AnalysisState(step, stateStack.toString(), signStack.toString(), buffer.toString(), op);
+			AnalysisState state = new AnalysisState(step, stateStack.toString(), signStack.toString(),
+					buffer.toString(), op);
 			analysisStates.add(state);
 			if (op == null) {
 				System.err.println("分析出搓");
@@ -359,12 +390,13 @@ public class SyntaxAnalysis {
 		}
 	}
 
-	/**打印消息到控制台
+	/**
+	 * 打印消息到控制台
 	 * 
 	 */
 	private void printList() {
 		System.out.println(printG());
-		
+
 		System.out.println("\nVN: ");
 		for (int i = 0; i < VN.size(); i++) {
 			System.out.print(VN.get(i) + " ");
@@ -384,13 +416,15 @@ public class SyntaxAnalysis {
 		System.out.println(Go.toString());
 
 		System.out.println(printSTA());
-		
-		for (int i =0; i < analysisStates.size();i++) {
+
+		for (int i = 0; i < analysisStates.size(); i++) {
 			System.out.println(analysisStates.get(i));
 		}
 	}
 
-	/**打印文法
+	/**
+	 * 打印文法
+	 * 
 	 * @return
 	 */
 	public String printG() {
@@ -400,6 +434,7 @@ public class SyntaxAnalysis {
 		}
 		return res.toString();
 	}
+
 	/**
 	 * 打印First集
 	 * 
@@ -427,13 +462,13 @@ public class SyntaxAnalysis {
 			for (String s : Clo.get(i)) {
 				String str = s.substring(0, s.indexOf(","));
 				if (css.contains(str)) {
-					hjf[css.indexOf(str)] += ("/" + s.substring(s.length()-1));
+					hjf[css.indexOf(str)] += ("/" + s.substring(s.length() - 1));
 				} else {
 					css.add(str);
-					hjf[css.size()-1] = s.substring(s.length()-1);
+					hjf[css.size() - 1] = s.substring(s.length() - 1);
 				}
 			}
-			for (int j = 0; j < css.size();j++) {
+			for (int j = 0; j < css.size(); j++) {
 				Clo1.get(i).add(css.get(j) + ", " + hjf[j]);
 			}
 		}
@@ -481,15 +516,19 @@ public class SyntaxAnalysis {
 		}
 		return res.toString();
 	}
-	
-	/**返回语法分析的状态
+
+	/**
+	 * 返回语法分析的状态
+	 * 
 	 * @return
 	 */
 	public List<AnalysisState> getAnalysisStates() {
 		return analysisStates;
 	}
-	
-	/**读入文法之后，可用来建分析表
+
+	/**
+	 * 读入文法之后，可用来建分析表
+	 * 
 	 * @param sa
 	 */
 	public void analysis(SyntaxAnalysis sa) {
@@ -501,23 +540,32 @@ public class SyntaxAnalysis {
 		sa.getSTA();
 	}
 
-	/**对文法进行增广，初始化项目集I0
+	/**
+	 * 对文法进行增广，初始化项目集I0
 	 * 
 	 */
 	private void init() {
 //		 判断是否需要增广文法
-		String s = G.get(0).substring(0, 1);	//取出文法开始符号
-		int count = 0 ;
+		String s = G.get(0).substring(0, 1); // 取出文法开始符号
+		int count = 0;
 		for (String str : G) {
 			if (str.startsWith(s)) {
 				count++;
 			}
 		}
-		if (count>1) {	//文法开始符号出现在多个产生式左部,进行增广
-			G.addFirst("A->"+s);
-			Clo.add(new ArrayList<String>() {{add("A->."+s+",#");}});
+		if (count > 1) { // 文法开始符号出现在多个产生式左部,进行增广
+			G.addFirst("A->" + s);
+			Clo.add(new ArrayList<String>() {
+				{
+					add("A->." + s + ",#");
+				}
+			});
 		} else {
-			Clo.add(new ArrayList<String>() {{add(s+"->." + G.get(0).substring(3)+",#");}});
+			Clo.add(new ArrayList<String>() {
+				{
+					add(s + "->." + G.get(0).substring(3) + ",#");
+				}
+			});
 		}
 
 //		//全部增广
@@ -535,8 +583,8 @@ public class SyntaxAnalysis {
 
 	public static void main(String[] args) {
 		SyntaxAnalysis sa = new SyntaxAnalysis();
-//		sa.readGrammar("src/main/java/ex2/grammar");
-//		sa.readGrammar("src/main/java/ex2/test");
+		sa.readGrammar("src/main/java/ex2/grammar");
+//		sa.readGrammar("src/main/java/ex2/test2");
 //		sa.readGrammar("src/main/java/ex2/test3");
 //		sa.readGrammar("src/main/java/ex2/fuzhi");
 //		sa.readGrammar("src/main/java/ex2/kongzhi");
@@ -551,6 +599,6 @@ public class SyntaxAnalysis {
 //		sa.run("fambgae");
 //		sa.run("ti;");
 		sa.printList();
-		
+
 	}
 }

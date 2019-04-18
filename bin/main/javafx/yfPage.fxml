@@ -31,7 +31,7 @@
       <Button fx:id="bt_sta" layoutX="600.0" layoutY="15.0" mnemonicParsing="false" onAction="#constructSTA" prefHeight="20.0" prefWidth="80.0" text="建分析表" />
       <Button fx:id="bt_analysis" layoutX="690.0" layoutY="15.0" mnemonicParsing="false" onAction="#analysis" prefHeight="20.0" prefWidth="80.0" text="语法分析" />
       <TextArea fx:id="ta_zgrammar" layoutX="540.0" layoutY="72.0" prefHeight="220.0" prefWidth="120.0" />
-      <Label layoutX="541.0" layoutY="55.0" text="增广文法" />
+      <Label layoutX="541.0" layoutY="55.0" text="改造文法" />
       <Button fx:id="bt_read_input" layoutX="420.0" layoutY="15.0" mnemonicParsing="false" prefHeight="20.0" prefWidth="80.0" text="导入字串" />
       <TableView fx:id="tv_grammar_table" layoutX="410.0" layoutY="72.0" prefHeight="220.0" prefWidth="120.0">
         <columns>
@@ -40,5 +40,7 @@
         </columns>
       </TableView>
       <Label layoutX="413.0" layoutY="55.0" text="终结符表" />
+      <Button fx:id="bt_cf_input" layoutX="330.0" layoutY="15.0" mnemonicParsing="false" onAction="#getInputFromCF" prefHeight="20.0" prefWidth="80.0" text="词法输入" />
+      <Button fx:id="bt_yf_clear" layoutX="778.0" layoutY="15.0" mnemonicParsing="false" onAction="#yfClear" prefHeight="20.0" prefWidth="80.0" text="清空表格" />
    </children>
 </AnchorPane>

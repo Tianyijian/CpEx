@@ -44,13 +44,16 @@ public class MainApp extends Application{
 	}
 	
 	private void init(Parent root, Stage stage) {
-		Button button = (Button) root.lookup("#btn_read_from_file");
-		Button bt_read_grammar = (Button) root.lookup("#bt_read_grammar");
-		Button bt_read_input = (Button) root.lookup("#bt_read_input");
+		Button bt_cf_read_input = (Button) root.lookup("#btn_read_from_file");
+		Button bt_yf_read_grammar = (Button) root.lookup("#bt_read_grammar");
+		Button bt_yf_read_input = (Button) root.lookup("#bt_read_input");
+		Button bt_yf_cf_input = (Button) root.lookup("#bt_cf_input");
 		TextArea ta_input = (TextArea)root.lookup("#ta_input");
 		TextArea ta_grammar = (TextArea)root.lookup("#ta_grammar");
 		TextArea ta_yf_input = (TextArea)root.lookup("#ta_yf_input");
-		button.setOnAction(new EventHandler<ActionEvent>() {
+		TextArea ta_cf_result = (TextArea)root.lookup("#ta_result");
+		//词法分析读入文件
+		bt_cf_read_input.setOnAction(new EventHandler<ActionEvent>() {
 
 			@Override
 			public void handle(ActionEvent event) {
@@ -64,7 +67,8 @@ public class MainApp extends Application{
 				
 			}
 		});
-		bt_read_grammar.setOnAction(new EventHandler<ActionEvent>() {
+		//语法分析读入语法
+		bt_yf_read_grammar.setOnAction(new EventHandler<ActionEvent>() {
 			
 			@Override
 			public void handle(ActionEvent event) {
@@ -77,7 +81,8 @@ public class MainApp extends Application{
 				}
 			}
 		});
-		bt_read_input.setOnAction(new EventHandler<ActionEvent>() {
+		//语法分析读入字符串
+		bt_yf_read_input.setOnAction(new EventHandler<ActionEvent>() {
 			
 			@Override
 			public void handle(ActionEvent event) {
@@ -88,6 +93,14 @@ public class MainApp extends Application{
 					String content = readFile(file);
 					ta_yf_input.setText(content);
 				}
+			}
+		});
+		//语法分析获取词法分析token序列
+		bt_yf_cf_input.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent event) {
+				ta_yf_input.setText("Token:\n" + ta_cf_result.getText());
 			}
 		});
 	}

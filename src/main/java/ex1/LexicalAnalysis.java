@@ -5,20 +5,18 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import ex2.Constant;
 import javafx.BianMa;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 public class LexicalAnalysis {
 	// 种别码， 按单词特性编码
-	private List<String> zbm = Arrays.asList("error", "bsf", "uint", "ufloat", "bool", "str", "for", "do", "if", "else",
-			"then", "true", "false", "int", "float", "boolean", "while", "(", ")", "{", "}", "[", "]", ",", ";", "+",
-			"-", "*", "=", ">", "<", "!", "&", "|", ">=", "==", "<=", "!=", "+=", "-=", "*=", "++", "&&", "||", "--");
+	private List<String> zbm = Constant.zbm;
 
 	private String content; // 要识别的内容
 	private int index; // 读取到的下标
@@ -134,9 +132,9 @@ public class LexicalAnalysis {
 			if (r == -1) { // 判断是否在符号表,不在则加入符号表
 				SymbolTable st = new SymbolTable(symbolTable.size() + 1 + "", word.toString(), "变量");
 				symbolTable.put(word.toString(), st);
-				res.append("(" + zbm.indexOf("bsf") + ", STIndex: " + symbolTable.size()+")\n");
+				res.append("(" + zbm.indexOf("id") + ", STIndex: " + symbolTable.size()+")\n");
 			} else {
-				res.append("(" + zbm.indexOf("bsf") + ", STIndex: " + r + ")\n");
+				res.append("(" + zbm.indexOf("id") + ", STIndex: " + r + ")\n");
 			}
 
 		}
@@ -171,7 +169,7 @@ public class LexicalAnalysis {
 			ch = content.charAt(index);
 		}
 		if (word.toString().contains(".")) {
-			res.append("(" + zbm.indexOf("ufloat") + "," + word.toString() + ")\n");
+			res.append("(" + zbm.indexOf("ureal") + "," + word.toString() + ")\n");
 
 		} else {
 			res.append("(" + zbm.indexOf("uint") + "," + word.toString() + ")\n");

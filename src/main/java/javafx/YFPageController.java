@@ -48,6 +48,12 @@ public class YFPageController implements Initializable{
     private Button bt_read_input;
     
     @FXML
+    private Button bt_yf_clear;
+    
+    @FXML
+    private Button bt_cf_input;
+    
+    @FXML
     private TextArea ta_first;
 
     @FXML
@@ -79,12 +85,17 @@ public class YFPageController implements Initializable{
     	ta_first.setText(sa.printFirst());
     	ta_items.setText(sa.printItem());
     	ta_sta.setText(sa.printSTA());
+    	tv_grammar_table.setItems(Constant.getGrammarTable());
     }
     
     @FXML
     void analysis(ActionEvent event) {
+    	
     	String input = ta_yf_input.getText();
     	if (input != null) {
+    		if (input.startsWith("Token")) {	//对token文件进行处理
+    			input = SyntaxAnalysis.readToken(input.substring(input.indexOf("(")));
+    		}
         	sa.run(input);
     		List<AnalysisState> res = sa.getAnalysisStates();
     		tv_result.setItems(FXCollections.observableArrayList());
@@ -102,9 +113,28 @@ public class YFPageController implements Initializable{
 		tc_action.setCellValueFactory(new PropertyValueFactory<AnalysisState, String>("action"));
 		tc_grammar_a.setCellValueFactory(CellData -> CellData.getValue().name());
 		tc_grammar_b.setCellValueFactory(CellData -> CellData.getValue().id());
-		tv_grammar_table.setItems(Constant.getGrammarTable());
 		sa = new SyntaxAnalysis();
 	}
+	
+
+    @FXML
+    void getInputFromCF(ActionEvent event) {
+
+    }
+
+    @FXML
+    void yfClear(ActionEvent event) {
+    	ta_zgrammar.clear();;
+    	ta_first.clear();
+    	ta_items.clear();;
+    	ta_sta.clear();
+    	ta_yf_input.clear();
+    	ta_grammar.clear();
+    	tv_result.setItems(FXCollections.observableArrayList());
+    	tv_grammar_table.setItems(FXCollections.observableArrayList());
+    	sa = new SyntaxAnalysis();
+    }
+
 
 }
 

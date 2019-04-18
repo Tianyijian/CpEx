@@ -1,4 +1,4 @@
 D -> D D | proc id ; D S | T id;             
 T -> X C |  record D                        
-X -> integer | real                 
+X -> integer | real | boolean            
 C -> [num]C | ε 

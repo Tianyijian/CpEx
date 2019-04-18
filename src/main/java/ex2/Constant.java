@@ -1,6 +1,8 @@
 package ex2;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javafx.BianMa;
@@ -9,6 +11,16 @@ import javafx.collections.ObservableList;
 
 public class Constant {
 
+	
+	/**词法分析的种别码表
+	 * 
+	 */
+	public static List<String> zbm = Arrays.asList("error", "id", "uint", "ureal", "bool", "str", "for", "do", "if", "else",
+			"then", "true", "false", "integer", "real", "boolean", "while", "(", ")", "{", "}", "[", "]", ",", ";", "+",
+			"-", "*", "=", ">", "<", "!", "&", "|", ">=", "==", "<=", "!=", "+=", "-=", "*=", "++", "&&", "||", "--");
+	
+	
+	
 	/**将文法中的终结符转换为单字符表示的终结符
 	 * 
 	 */
@@ -18,6 +30,7 @@ public class Constant {
 		put("digit", "d");
 		put("integer", "t");
 		put("real", "r");
+		put("boolean", "o");	//
 		put("record", "s");
 		put("proc", "p");
 		put("num", "n");

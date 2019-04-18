@@ -1,6 +1,6 @@
-int a;
+integer a;
 a = 3;
-float b;
+real b;
 b = 1.2;
 boolean c;
 c = true;
