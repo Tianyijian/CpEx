@@ -8,7 +8,7 @@
 <AnchorPane prefHeight="620.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafx.YFPageController">
    <children>
       <Label layoutX="26.0" layoutY="55.0" text="输入" />
-      <Label layoutX="670.0" layoutY="55.0" text="First集" />
+      <Label layoutX="670.0" layoutY="55.0" text="First Follow" />
       <Label layoutX="800.0" layoutY="55.0" text="项目集族" />
       <Label layoutX="220.0" layoutY="55.0" text="文法" />
       <TextArea fx:id="ta_yf_input" layoutX="20.0" layoutY="72.0" prefHeight="220.0" prefWidth="190.0" />

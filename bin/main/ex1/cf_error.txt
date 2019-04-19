@@ -1,0 +1,18 @@
+integer a;
+a ^= 3;
+real b;
+b = 1.2e.3;
+boolean c;
+c = true;
+/*测试分支语句
+换行的注释测试*/
+if (a !=! 5) {
+a = a + a;
+} else {
+b = b * b;
+}
+/*测试循环语句
+未封闭的注释
+do {
+c = false;
+} while(c);

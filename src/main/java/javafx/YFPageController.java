@@ -82,7 +82,7 @@ public class YFPageController implements Initializable{
     	sa.readGrammarFromContent(ta_grammar.getText());
     	sa.analysis(sa);
     	ta_zgrammar.setText(sa.printG());
-    	ta_first.setText(sa.printFirst());
+    	ta_first.setText(sa.printFirst() + sa.printFollow());
     	ta_items.setText(sa.printItem());
     	ta_sta.setText(sa.printSTA());
     	tv_grammar_table.setItems(Constant.getGrammarTable());
