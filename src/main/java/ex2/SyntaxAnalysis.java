@@ -114,6 +114,7 @@ public class SyntaxAnalysis {
 	 * 获取非终结符的First集
 	 * 
 	 */
+	@SuppressWarnings("serial")
 	private void getFirst() {
 		for (int i = 0; i < VN.size(); i++) {
 			First.put(VN.get(i), new HashSet<Character>());
@@ -544,6 +545,7 @@ public class SyntaxAnalysis {
 	 * 对文法进行增广，初始化项目集I0
 	 * 
 	 */
+	@SuppressWarnings("serial")
 	private void init() {
 //		 判断是否需要增广文法
 		String s = G.get(0).substring(0, 1); // 取出文法开始符号

@@ -96,6 +96,7 @@ public class YFPageController implements Initializable{
     		if (input.startsWith("Token")) {	//对token文件进行处理
     			input = SyntaxAnalysis.readToken(input.substring(input.indexOf("(")));
     		}
+    		System.out.println(input);
         	sa.run(input);
     		List<AnalysisState> res = sa.getAnalysisStates();
     		tv_result.setItems(FXCollections.observableArrayList());

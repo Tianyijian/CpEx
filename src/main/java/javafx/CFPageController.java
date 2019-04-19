@@ -6,6 +6,7 @@ import java.util.ResourceBundle;
 
 import ex1.LexicalAnalysis;
 import ex1.SymbolTable;
+import ex2.Constant;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -57,7 +58,7 @@ public class CFPageController implements Initializable{
 		tc_symbol_extend.setCellValueFactory(new PropertyValueFactory<SymbolTable, String>("extend"));
 		tc_symbol_type.setCellValueFactory(new PropertyValueFactory<SymbolTable, String>("type"));
 		tc_symbol_attribute.setCellValueFactory(new PropertyValueFactory<SymbolTable, String>("attribute"));
-		tv_bm.setItems(new LexicalAnalysis().getBianMa());
+		tv_bm.setItems(Constant.getBianMa());
 	}
 
 	@FXML

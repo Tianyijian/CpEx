@@ -1,0 +1,16 @@
+integer a;
+a = 3;
+real b;
+b = 1.2e+3;
+boolean c;
+c = true;
+/*测试分支语句*/
+if (a <= 5) {
+a = a + a;
+} else {
+b = b * 1.2;
+}
+/*测试循环语句*/
+do {
+c = false;
+} while(c);

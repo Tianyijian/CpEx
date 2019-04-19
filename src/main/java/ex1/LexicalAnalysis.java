@@ -10,9 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 import ex2.Constant;
-import javafx.BianMa;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 public class LexicalAnalysis {
 	// 种别码， 按单词特性编码
@@ -92,7 +89,7 @@ public class LexicalAnalysis {
 				recogId(); // 识别标识符
 			} else if (isDigit(ch)) {
 				recogDig(); // 识别数字
-			} else if (ch == '/') {
+			} else if (ch == '/') {	
 				recogCom(); // 识别注释
 			} else if (ch == ' ') { // 空格
 				index++;
@@ -160,7 +157,7 @@ public class LexicalAnalysis {
 		char ch = content.charAt(index);
 		StringBuffer word = new StringBuffer();
 		while (true) {
-			if (isDigit(ch) || ch == '.') {
+			if (isDigit(ch) || isFloat(ch)) {
 				word.append(ch);
 				index++;
 			} else {
@@ -168,13 +165,16 @@ public class LexicalAnalysis {
 			}
 			ch = content.charAt(index);
 		}
-		if (word.toString().contains(".")) {
-			res.append("(" + zbm.indexOf("ureal") + "," + word.toString() + ")\n");
+		if (word.toString().matches("[0-9]+\\.?[0-9]*(e[+-]?[0-9]+)?")) {
+			if (word.toString().contains(".")) {
+				res.append("(" + zbm.indexOf("ureal") + "," + word.toString() + ")\n");
 
+			} else {
+				res.append("(" + zbm.indexOf("uint") + "," + word.toString() + ")\n");
+			}
 		} else {
-			res.append("(" + zbm.indexOf("uint") + "," + word.toString() + ")\n");
+			console.append("Digit error in line " + (lineNum.size() + 1) + ": " + word.toString()+ "\n");
 		}
-
 	}
 
 	/**
@@ -189,7 +189,7 @@ public class LexicalAnalysis {
 		while (true) {
 			index++;
 			if (index >= content.length()) {
-				console.append("Comment not end: " + sb.toString() + "\n");
+				console.append("Comment not end in line " + (lineNum.size() + 1) + ": " +sb.toString() + "\n");
 				return;
 			}
 			ch = content.charAt(index);
@@ -198,7 +198,7 @@ public class LexicalAnalysis {
 					char ch1 = content.charAt(index + 1);
 					if (ch1 == '/') {
 						index += 2;
-						console.append("Comment: " + sb.toString() + "\n");
+						console.append("Comment in line " + (lineNum.size() + 1) + ": " + sb.toString() + "\n");
 						return;
 					}
 				}
@@ -215,22 +215,22 @@ public class LexicalAnalysis {
 	}
 
 	/**
-	 * 识别界限符.
+	 * 识别界符以及运算符
 	 */
 	private void recogDel() {
 		char ch = content.charAt(index);
-
-		if (isDel(ch)) { // 单个界限符
+		
+		if (isDel(ch)) { // 单个界符或者运算符
 			if (index < content.length() - 1) {
 				String str = content.substring(index, index + 2);
-				if (isDDel(str)) { // 双界限符
+				if (isDDel(str)) { // 双运算符
 					res.append("(" + zbm.indexOf(str) + ", 0)\n");
 					index += 2;
 					return;
 				}
 
 			}
-			if (ch == '!') {
+			if (ch == '!') {	//‘!=’为合法运算符，‘!’为不合法字符
 				error();
 			}
 			res.append("(" + zbm.indexOf(ch + "") + ", 0)\n");
@@ -246,7 +246,7 @@ public class LexicalAnalysis {
 	 * @return
 	 */
 	private boolean isGjz(String word) {
-		if (zbm.subList(zbm.indexOf("for"), zbm.indexOf("while") + 1).contains(word)) {
+		if (zbm.subList(zbm.indexOf("integer"), zbm.indexOf("or") + 1).contains(word)) {
 			return true;
 		}
 		return false;
@@ -258,20 +258,20 @@ public class LexicalAnalysis {
 	 * @return
 	 */
 	private boolean isDel(char ch) {
-		if (zbm.subList(zbm.indexOf("("), zbm.indexOf("|") + 1).contains("" + ch)) {
+		if (zbm.subList(zbm.indexOf("("), zbm.indexOf("<") + 1).contains("" + ch) || ch == '!') {
 			return true;
 		}
 		return false;
 	}
 
 	/**
-	 * 判断是否是双界限符
+	 * 判断是否是双运算符
 	 * 
 	 * @param str
 	 * @return
 	 */
 	private boolean isDDel(String str) {
-		if (zbm.subList(zbm.indexOf(">="), zbm.indexOf("--") + 1).contains(str)) {
+		if (zbm.subList(zbm.indexOf(">="), zbm.indexOf("!=") + 1).contains(str)) {
 			return true;
 		}
 		return false;
@@ -290,6 +290,16 @@ public class LexicalAnalysis {
 		return false;
 	}
 
+	/**判断是否是浮点数或者科学计数法
+	 * @param ch
+	 * @return
+	 */
+	private boolean isFloat(char ch) {
+		if (ch == '.' || ch == 'e' || ch == 'E' || ch == '+' || ch == '-') {
+			return true;
+		}
+		return false;
+	}
 	/**
 	 * 判断是否是字母或者下划线
 	 * 
@@ -346,22 +356,9 @@ public class LexicalAnalysis {
 		for (int i = 0; i < lineNum.size(); i++) {
 			sum += lineNum.get(i) + 1;
 		}
-		console.append("illegal char: (%d row, %d col)\n", line, index + 1 - sum);
+		console.append(String.format("illegal char: (%d row, %d col)\n", line, index + 1 - sum));
 	}
 
-	/**
-	 * 返回种别码给界面
-	 * 
-	 * @return
-	 */
-	public ObservableList<BianMa> getBianMa() {
-		ObservableList<BianMa> res = FXCollections.observableArrayList();
-		for (int i = 0; i < zbm.size(); i++) {
-			BianMa bianMa = new BianMa(i + "", zbm.get(i));
-			res.add(bianMa);
-		}
-		return res;
-	}
 
 	/**
 	 * 返回符号表
