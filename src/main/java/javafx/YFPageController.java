@@ -83,6 +83,7 @@ public class YFPageController implements Initializable{
     @FXML
     void constructSTA(ActionEvent event) {
     	sa.readGrammarFromContent(ta_grammar.getText());
+    	sa.clearConsole();
     	sa.analysis(sa);
     	ta_zgrammar.setText(sa.printG());
     	ta_first.setText(sa.printFirst() + sa.printFollow());
@@ -99,6 +100,7 @@ public class YFPageController implements Initializable{
     	if (input != null) {
     		if (input.startsWith("Token")) {	//对token文件进行处理
     			input = SyntaxAnalysis.readToken(input.substring(input.indexOf("(")));
+//        		ta_yf_input.setText(ta_yf_input.getText() +"\n\n" +  input);
     		}
 //    		System.out.println(input);
         	sa.run(input);

@@ -1,0 +1,16 @@
+P -> D
+P -> S
+S -> S S
+
+D -> D D | proc id ; | D S | T id;             
+T -> X C |  record D                        
+X -> integer | real
+C -> [num]C | ε 
+
+S -> id = E ;| L = E ;
+E -> E + E | E * E | -E | (E) | id | digit | L
+L -> id[E] | L[E]
+
+S -> if B then S | if B then S else S | while B do S                 
+B -> B or B | B and B | not B | (B) | E relop E | true | false                         
+relop -> < | <= | == | != | > | >= 

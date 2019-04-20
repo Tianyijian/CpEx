@@ -40,6 +40,9 @@ public class SyntaxAnalysis {
 			BufferedReader br = new BufferedReader(new FileReader(file));
 			String line = "";
 			while ((line = br.readLine()) != null) {
+				if (line.isBlank()) {
+					continue;
+				}
 				String[] str = gVT(line).replaceAll("\\s+", "").split("\\|");
 				G.add(str[0]);
 				for (int i = 1; i < str.length; i++) {
@@ -332,7 +335,7 @@ public class SyntaxAnalysis {
 	}
 
 	/**
-	 * 获得分析表 TODO 判断每个元素是否最多只有一个明确的动作
+	 * 获得分析表 , 并判断每个元素是否最多只有一个明确的动作,即二义性文法检查
 	 */
 	private void getSTA() {
 		ACTION = new String[Clo.size()][VT.size()];
@@ -355,12 +358,12 @@ public class SyntaxAnalysis {
 			}
 			for (String s : Ik) {
 				String str = s.substring(0, s.indexOf("."));
-				if (G.contains(str)) {		
+				if (G.contains(str)) {
 					erYiError("ACTION", k, s.charAt(s.length() - 1)); // 判断是否是二义文法,并记录,做覆盖操作
 					ACTION[k][VT.indexOf(s.charAt(s.length() - 1))] = "r" + G.indexOf(str);
-				} else if (G.contains(str+'ε')){	//空产生式的处理,不检查action表
+				} else if (G.contains(str + 'ε')) { // 空产生式的处理,不检查action表
 //					erYiError("ACTION", k, s.charAt(s.length() - 1)); // 判断是否是二义文法,并记录,做覆盖操作
-					ACTION[k][VT.indexOf(s.charAt(s.length() - 1))] = "r" + G.indexOf(str+'ε');
+					ACTION[k][VT.indexOf(s.charAt(s.length() - 1))] = "r" + G.indexOf(str + 'ε');
 				}
 			}
 			if (Ik.contains(G.get(0) + ".,#")) {
@@ -396,6 +399,8 @@ public class SyntaxAnalysis {
 	 * @param content
 	 */
 	public void run(String content) {
+		analysisStates.clear();
+		clearConsole();
 		Stack<Integer> stateStack = new Stack<Integer>(); // 状态栈
 		Stack<Character> signStack = new Stack<Character>(); // 符号栈
 		Queue<Character> buffer = new LinkedList<Character>(); // 缓冲区
@@ -405,29 +410,50 @@ public class SyntaxAnalysis {
 		buffer.add('#');
 		stateStack.push(0);
 		signStack.push('#');
-		int step = 0;
+		int step = 0; // 记录步骤数
+		int production_num = 0; // 记录产生式数
 		while (true) {
 			step++;
+			AnalysisState state = new AnalysisState(step, stateStack.toString(), signStack.toString(),
+					buffer.toString(), "");
+			analysisStates.add(state);
+			if (buffer.isEmpty()) { // 缓冲区已为空
+				state.setAction("Error!Buffer is NULL!");
+				console.append("Error!Buffer is NULL!\n");
+				break;
+			}
 			int s = stateStack.peek(); // 栈顶状态
 			char a = buffer.peek(); // 缓冲区首字符
 			String op = ACTION[s][VT.indexOf(a)];
-			AnalysisState state = new AnalysisState(step, stateStack.toString(), signStack.toString(),
-					buffer.toString(), op);
-			analysisStates.add(state);
+			state.setAction(op);
 			if (op == null) {
-				String errorInfo = "Error at Line " + (content.length() - buffer.size() + 1) + ": ACTION[" + s + "]["
-						+ a + "]";
-				System.err.println(errorInfo); //  错误处理
+				String errorInfo = "Error at Line " + (content.length() - buffer.size() + 2) + " Step " + step
+						+ ": ACTION[" + s + "][" + a + "]";
+//				System.err.println(errorInfo); // 错误处理
 				state.setAction(errorInfo);
+				console.append(errorInfo + "\n");
 				while (VT.contains(signStack.peek())) { // 弹出符号栈顶的终结符,直至遇到非终结符A
-					signStack.pop();
-					stateStack.pop();
+					console.append("Pop stack:\t" + signStack.pop());
+					console.append("\t" + stateStack.pop() + "\n");
+					if (signStack.isEmpty()) { // 符号栈弹空
+						break;
+					}
+				}
+				if (signStack.isEmpty()) { // 状态栈弹空,压入起始符号,重新开始
+					stateStack.push(0);
+					signStack.push('#');
+					console.append("Stack is empty! Restart at step " + step + "\n");
+					console.append("Remove buffer:\t" + buffer.poll() + "\n"); // 先把当前错的删除
+					continue;
 				}
 				stateStack.pop(); // 露出状态s
 				char A = signStack.peek();
-				buffer.poll(); // 先把当前错的删除
+				console.append("Remove buffer: " + buffer.poll() + "\n"); // 先把当前错的删除
 				while (!Follow.get(A).contains(buffer.peek())) { // 不断读入输入符号,直至遇到a ∈Follow(A)
-					buffer.poll();
+					console.append("Remove buffer: " + buffer.poll() + "\n");
+					if (buffer.isEmpty()) { // 缓冲区弹空
+						break;
+					}
 				}
 				stateStack.push(GOTO[stateStack.peek()][VN.indexOf(A)]); // 将goto[s,A] 压入栈
 				continue;
@@ -443,7 +469,7 @@ public class SyntaxAnalysis {
 			} else if (op.contains("r")) {
 				String g = G.get(t); // 产生式 A→β
 				int n = g.length() - 3;
-				if (g.charAt(3) == 'ε') {			//空产生式不弹栈
+				if (g.charAt(3) == 'ε') { // 空产生式不弹栈
 					n = 0;
 				}
 				while (n-- > 0) { // 从栈顶弹出 β个字符
@@ -454,7 +480,8 @@ public class SyntaxAnalysis {
 				stateStack.push(GOTO[stateStack.peek()][VN.indexOf(A)]); // GOTO[t', A]入栈
 				signStack.push(A); // A入栈
 				state.setAction(op + ": " + g); // 记录使用的归约式
-				console.append("\n" + g);
+				production_num++;
+				console.append(production_num + ":\t" + g + "\n");
 			}
 		}
 	}
@@ -466,6 +493,9 @@ public class SyntaxAnalysis {
 	public void readGrammarFromContent(String content) {
 		String[] line = gVT(content).split("\n");
 		for (int j = 0; j < line.length; j++) {
+			if (line[j].isBlank()) {
+				continue;
+			}
 			String[] str = line[j].replaceAll("\\s+", "").split("\\|");
 			G.add(str[0]);
 			for (int i = 1; i < str.length; i++) {
@@ -494,8 +524,8 @@ public class SyntaxAnalysis {
 
 		System.out.println(printFollow());
 
-		System.out.println("\n\nClosure: ");
-		System.out.println(printItem());
+		System.out.println("\n\nClosure: " + Clo.size());
+//		System.out.println(printItem());
 
 		System.out.println("\n\nGo: " + Go.size());
 		System.out.println(Go.toString());
@@ -505,7 +535,8 @@ public class SyntaxAnalysis {
 		for (int i = 0; i < analysisStates.size(); i++) {
 			System.out.println(analysisStates.get(i));
 		}
-
+		
+		System.out.println();
 		System.err.println(printConsole());
 	}
 
@@ -629,27 +660,20 @@ public class SyntaxAnalysis {
 	}
 
 	/**
+	 * 清空控制台信息
+	 * 
+	 */
+	public void clearConsole() {
+		console.delete(0, console.length());
+	}
+
+	/**
 	 * 返回语法分析的状态
 	 * 
 	 * @return
 	 */
 	public List<AnalysisState> getAnalysisStates() {
 		return analysisStates;
-	}
-
-	/**
-	 * 读入文法之后，可用来建分析表
-	 * 
-	 * @param sa
-	 */
-	public void analysis(SyntaxAnalysis sa) {
-		sa.init();
-		sa.getVTVN();
-		sa.getFirst();
-		sa.getFollow();
-		sa.getClosure(sa.Clo.get(0));
-		sa.getClo();
-		sa.getSTA();
 	}
 
 	/**
@@ -667,10 +691,10 @@ public class SyntaxAnalysis {
 			}
 		}
 		if (count > 1) { // 文法开始符号出现在多个产生式左部,进行增广
-			G.addFirst("A->" + s);
+			G.addFirst("Z->" + s);
 			Clo.add(new ArrayList<String>() {
 				{
-					add("A->." + s + ",#");
+					add("Z->." + s + ",#");
 				}
 			});
 		} else {
@@ -694,15 +718,12 @@ public class SyntaxAnalysis {
 //		Clo.add(new ArrayList<String>() {{add("A->.S,#");}});
 	}
 
-	public static void main(String[] args) {
-		SyntaxAnalysis sa = new SyntaxAnalysis();
-//		sa.readGrammar("src/main/java/ex2/grammar1.txt");
-//		sa.readGrammar("src/main/java/ex2/test");
-//		sa.readGrammar("src/main/java/ex2/test3");
-//		sa.readGrammar("src/main/java/ex2/fuzhi");
-//		sa.readGrammar("src/main/java/ex2/kongzhi");
-		sa.readGrammar("src/main/java/ex2/shengming");
-//		sa.readGrammar("src/main/java/ex2/kongchuan.txt");
+	/**
+	 * 读入文法之后，可用来建分析表
+	 * 
+	 * @param sa
+	 */
+	public void analysis(SyntaxAnalysis sa) {
 		sa.init();
 		sa.getVTVN();
 		sa.getFirst();
@@ -710,12 +731,20 @@ public class SyntaxAnalysis {
 		sa.getClosure(sa.Clo.get(0));
 		sa.getClo();
 		sa.getSTA();
-//		sa.run("abab");
-//		sa.run("i+i*i");
-//		sa.run("(i+i)*i)+i");
-//		sa.run("fambgae");
-		sa.run("ti;");
-		sa.printList();
+	}
 
+	public static void main(String[] args) {
+		SyntaxAnalysis sa = new SyntaxAnalysis();
+		sa.readGrammar("src/main/java/ex2/ALL_wf.txt");
+		sa.init();
+		sa.getVTVN();
+		sa.getFirst();
+		sa.getFollow();
+		sa.getClosure(sa.Clo.get(0));
+		sa.getClo();
+		sa.getSTA();
+		sa.clearConsole();
+		sa.run("ti;ri;i=d;i=d;f(ijdya)gi=i*d+d;ei=i*(i+d);w(imd)vi=i+d;");
+		sa.printList();
 	}
 }

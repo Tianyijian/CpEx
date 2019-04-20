@@ -44,11 +44,12 @@ public class Constant {
 			put("not", "z");
 			put("true", "a");
 			put("false", "b");
-			put("relop", "c");
+			put("relop", "R");
 			put("<=", "j");
 			put(">=", "k");
 			put("==", "l");
 			put("!=", "m");
+			put("call", "h");
 		}
 	};
 	

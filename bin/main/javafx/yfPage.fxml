@@ -16,12 +16,12 @@
       <TextArea fx:id="ta_first" layoutX="670.0" layoutY="72.0" prefHeight="220.0" prefWidth="120.0" />
       <TextArea fx:id="ta_items" layoutX="800.0" layoutY="72.0" prefHeight="220.0" prefWidth="380.0" />
       <Label layoutX="26.0" layoutY="312.0" text="LR分析表" />
-      <TableView fx:id="tv_result" layoutX="410.0" layoutY="334.0" prefHeight="252.0" prefWidth="580.0">
+      <TableView fx:id="tv_result" layoutX="410.0" layoutY="334.0" prefHeight="252.0" prefWidth="510.0">
          <columns>
-            <TableColumn fx:id="tc_step" prefWidth="85.0" text="步骤" />
-            <TableColumn fx:id="tc_state" prefWidth="130.0" text="状态栈" />
-            <TableColumn fx:id="tc_sign" prefWidth="130.0" text="符号栈" />
-            <TableColumn fx:id="tc_buffer" prefWidth="130.0" text="缓冲区" />
+            <TableColumn fx:id="tc_step" prefWidth="50.0" text="步骤" />
+            <TableColumn fx:id="tc_state" prefWidth="120.0" text="状态栈" />
+            <TableColumn fx:id="tc_sign" prefWidth="120.0" text="符号栈" />
+            <TableColumn fx:id="tc_buffer" prefWidth="120.0" text="缓冲区" />
             <TableColumn fx:id="tc_action" prefWidth="105.0" text="执行动作" />
          </columns>
       </TableView>
@@ -42,7 +42,7 @@
       <Label layoutX="413.0" layoutY="55.0" text="终结符表" />
       <Button fx:id="bt_cf_input" layoutX="330.0" layoutY="15.0" mnemonicParsing="false" onAction="#getInputFromCF" prefHeight="20.0" prefWidth="80.0" text="词法输入" />
       <Button fx:id="bt_yf_clear" layoutX="778.0" layoutY="15.0" mnemonicParsing="false" onAction="#yfClear" prefHeight="20.0" prefWidth="80.0" text="清空表格" />
-      <TextArea fx:id="ta_yf_result" layoutX="1002.0" layoutY="334.0" prefHeight="252.0" prefWidth="180.0" />
-      <Label layoutX="1002.0" layoutY="312.0" text="打印信息" />
+      <TextArea fx:id="ta_yf_result" layoutX="930.0" layoutY="334.0" prefHeight="252.0" prefWidth="250.0" />
+      <Label layoutX="930.0" layoutY="312.0" text="打印信息" />
    </children>
 </AnchorPane>

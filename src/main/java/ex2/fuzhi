@@ -1,3 +1,0 @@
-S -> id = E ;| L = E ;
-E -> E + E | E * E | -E | (E) | id | digit | L
-L -> id[E] | L[E]
