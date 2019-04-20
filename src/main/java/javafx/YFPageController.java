@@ -66,6 +66,9 @@ public class YFPageController implements Initializable{
     private TextArea ta_yf_input;
 
     @FXML
+    private TextArea ta_yf_result;
+    
+    @FXML
     private TextArea ta_sta;
 
     @FXML
@@ -86,6 +89,7 @@ public class YFPageController implements Initializable{
     	ta_items.setText(sa.printItem());
     	ta_sta.setText(sa.printSTA());
     	tv_grammar_table.setItems(Constant.getGrammarTable());
+    	ta_yf_result.setText(sa.printConsole());
     }
     
     @FXML
@@ -96,11 +100,12 @@ public class YFPageController implements Initializable{
     		if (input.startsWith("Token")) {	//对token文件进行处理
     			input = SyntaxAnalysis.readToken(input.substring(input.indexOf("(")));
     		}
-    		System.out.println(input);
+//    		System.out.println(input);
         	sa.run(input);
     		List<AnalysisState> res = sa.getAnalysisStates();
     		tv_result.setItems(FXCollections.observableArrayList());
     		tv_result.setItems(FXCollections.observableList(res));
+    		ta_yf_result.setText(sa.printConsole());
     	}
 
     }
@@ -133,6 +138,7 @@ public class YFPageController implements Initializable{
     	ta_grammar.clear();
     	tv_result.setItems(FXCollections.observableArrayList());
     	tv_grammar_table.setItems(FXCollections.observableArrayList());
+    	ta_yf_result.clear();
     	sa = new SyntaxAnalysis();
     }
 

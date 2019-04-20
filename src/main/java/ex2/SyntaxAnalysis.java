@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,6 +27,7 @@ public class SyntaxAnalysis {
 	private String[][] ACTION;
 	private int[][] GOTO;
 	private List<AnalysisState> analysisStates = new ArrayList<AnalysisState>(); // 记录语法分析状态
+	private StringBuilder console = new StringBuilder(); // 记录控制台信息
 
 	/**
 	 * 从文件读入文法
@@ -63,7 +63,7 @@ public class SyntaxAnalysis {
 		List<String> zbm = Constant.zbm;
 		Map<String, String> grammarMap = Constant.grammarTable;
 		String[] str = content.split("\n");
-		System.out.println(str.length);
+//		System.out.println(str.length);
 		for (int i = 0; i < str.length; i++) {
 			String s = str[i];
 			String key = zbm.get(Integer.valueOf(s.substring(1, s.indexOf(","))));
@@ -166,18 +166,18 @@ public class SyntaxAnalysis {
 		for (int i = 0; i < VN.size(); i++) {
 			Follow.put(VN.get(i), new HashSet<Character>());
 		}
-		char S = G.get(0).charAt(0);	//取出该文法的开始符
+		char S = G.get(0).charAt(0); // 取出该文法的开始符
 		Follow.get(S).add('#');
 		int hash;
 		do {
 			hash = Follow.hashCode();
-			for (int i = 0; i < G.size();i++) {
-				char[] ch = G.get(i).toCharArray();		//A→αBβ∈P
+			for (int i = 0; i < G.size(); i++) {
+				char[] ch = G.get(i).toCharArray(); // A→αBβ∈P
 				int j = 3;
-				while(j < ch.length) {
-					if (VN.contains(ch[j])) {	//该符号为非终结符 B
-						if (j + 1 < ch.length) {	//取出其后继符号的First集
-							Set<Character> strFirst = getStrFirst(G.get(i).substring(j+1));
+				while (j < ch.length) {
+					if (VN.contains(ch[j])) { // 该符号为非终结符 B
+						if (j + 1 < ch.length) { // 取出其后继符号的First集
+							Set<Character> strFirst = getStrFirst(G.get(i).substring(j + 1));
 							if (strFirst.contains('ε')) {
 								strFirst.remove('ε');
 								Follow.get(ch[j]).addAll(strFirst);
@@ -185,14 +185,14 @@ public class SyntaxAnalysis {
 							} else {
 								Follow.get(ch[j]).addAll(strFirst);
 							}
-						} else {		//无后继符号 A→αB FOLLOW(B):=FOLLOW(B)∪FOLLOW(A); 
+						} else { // 无后继符号 A→αB FOLLOW(B):=FOLLOW(B)∪FOLLOW(A);
 							Follow.get(ch[j]).addAll(Follow.get(ch[0]));
 						}
 					}
-					j++;	//遍历每个字符
+					j++; // 遍历每个字符
 				}
 			}
-		} while(Follow.hashCode() != hash);	// 判断是否有 Follow 集进行了改变
+		} while (Follow.hashCode() != hash); // 判断是否有 Follow 集进行了改变
 	}
 
 	/**
@@ -332,8 +332,7 @@ public class SyntaxAnalysis {
 	}
 
 	/**
-	 * 获得分析表
-	 * 
+	 * 获得分析表 TODO 判断每个元素是否最多只有一个明确的动作
 	 */
 	private void getSTA() {
 		ACTION = new String[Clo.size()][VT.size()];
@@ -344,10 +343,12 @@ public class SyntaxAnalysis {
 				if (Integer.valueOf(s.substring(2, s.indexOf(","))) == k) {
 					char x = s.charAt(s.lastIndexOf(")") - 1);
 					if (VT.contains(x)) { // 终结符
+						erYiError("ACTION", k, x); // 判断是否是二义文法,并记录,做覆盖操作
 						ACTION[k][VT.indexOf(x)] = "s" + Go.get(s).substring(1);
 					} else { // 非终结符
 						int j = Integer.valueOf(Go.get(s).substring(1));
 						int a = VN.indexOf(x);
+						erYiError("GOTO", k, x); // 判断是否是二义文法,并记录,做覆盖操作
 						GOTO[k][a] = j;
 					}
 				}
@@ -355,13 +356,34 @@ public class SyntaxAnalysis {
 			for (String s : Ik) {
 				String str = s.substring(0, s.indexOf("."));
 				if (G.contains(str)) {
+					erYiError("ACTION", k, s.charAt(s.length() - 1)); // 判断是否是二义文法,并记录,做覆盖操作
 					ACTION[k][VT.indexOf(s.charAt(s.length() - 1))] = "r" + G.indexOf(str);
 				}
 			}
 			if (Ik.contains(G.get(0) + ".,#")) {
+				erYiError("ACTION", k, '#'); // 判断是否是二义文法,并记录,做覆盖操作
 				ACTION[k][VT.indexOf('#')] = "acc";
 			}
 
+		}
+	}
+
+	/**
+	 * 判断文法是否有二义性错误,仅做信息记录
+	 * 
+	 * @param type
+	 * @param s
+	 * @param x
+	 */
+	private void erYiError(String type, int k, char x) {
+		if (type.equals("ACTION")) {
+			if (ACTION[k][VT.indexOf(x)] != null) {
+				console.append("文法二义性：ACTION[" + k + "][" + x + "]=" + ACTION[k][VT.indexOf(x)] + "已存在\n");
+			}
+		} else {
+			if (GOTO[k][VN.indexOf(x)] != 0) {
+				console.append("文法二义性：GOTO[" + k + "][" + x + "]=" + GOTO[k][VN.indexOf(x)] + "已存在\n");
+			}
 		}
 	}
 
@@ -390,22 +412,21 @@ public class SyntaxAnalysis {
 					buffer.toString(), op);
 			analysisStates.add(state);
 			if (op == null) {
-				String errorInfo = "Error at Line " + step + ": ACTION[" + s +"]["+ a +"]";
+				String errorInfo = "Error at Line " + (content.length() - buffer.size() + 1) + ": ACTION[" + s + "]["
+						+ a + "]";
 				System.err.println(errorInfo); // TODO 错误处理
 				state.setAction(errorInfo);
-				while(VT.contains(signStack.peek())) {	//弹出符号栈顶的终结符,直至遇到非终结符A
+				while (VT.contains(signStack.peek())) { // 弹出符号栈顶的终结符,直至遇到非终结符A
 					signStack.pop();
 					stateStack.pop();
 				}
-				stateStack.pop();		//露出状态s
+				stateStack.pop(); // 露出状态s
 				char A = signStack.peek();
-				buffer.poll();	//先把当前错的删除
-				while(!Follow.get(A).contains(buffer.peek())) {	//不断读入输入符号,直至遇到a ∈Follow(A)
+				buffer.poll(); // 先把当前错的删除
+				while (!Follow.get(A).contains(buffer.peek())) { // 不断读入输入符号,直至遇到a ∈Follow(A)
 					buffer.poll();
 				}
-				stateStack.push(GOTO[stateStack.peek()][VN.indexOf(A)]);	//将goto[s,A] 压入栈
-//				break;
-//				step++;
+				stateStack.push(GOTO[stateStack.peek()][VN.indexOf(A)]); // 将goto[s,A] 压入栈
 				continue;
 			}
 			if (op.equals("acc")) { // 分析完成
@@ -427,8 +448,8 @@ public class SyntaxAnalysis {
 				stateStack.push(GOTO[stateStack.peek()][VN.indexOf(A)]); // GOTO[t', A]入栈
 				signStack.push(A); // A入栈
 				state.setAction(op + ": " + g); // 记录使用的归约式
+				console.append("\n" + g);
 			}
-		
 		}
 	}
 
@@ -466,7 +487,7 @@ public class SyntaxAnalysis {
 		System.out.println(printFirst());
 
 		System.out.println(printFollow());
-		
+
 		System.out.println("\n\nClosure: ");
 		System.out.println(printItem());
 
@@ -478,6 +499,8 @@ public class SyntaxAnalysis {
 		for (int i = 0; i < analysisStates.size(); i++) {
 			System.out.println(analysisStates.get(i));
 		}
+
+		System.err.println(printConsole());
 	}
 
 	/**
@@ -500,14 +523,16 @@ public class SyntaxAnalysis {
 	 */
 	public String printFirst() {
 		StringBuilder res = new StringBuilder();
-		res.append("\n\nFisrt: \n");
+		res.append("Fisrt: \n");
 		for (Character ch : First.keySet()) {
 			res.append(ch + ": \t" + First.get(ch).toString() + "\n");
 		}
 		return res.toString();
 	}
 
-	/**打印Follow集
+	/**
+	 * 打印Follow集
+	 * 
 	 * @return
 	 */
 	public String printFollow() {
@@ -518,7 +543,7 @@ public class SyntaxAnalysis {
 		}
 		return res.toString();
 	}
-	
+
 	/**
 	 * 打印项目集
 	 * 
@@ -589,6 +614,15 @@ public class SyntaxAnalysis {
 	}
 
 	/**
+	 * 打印控制台信息
+	 * 
+	 * @return
+	 */
+	public String printConsole() {
+		return console.toString();
+	}
+
+	/**
 	 * 返回语法分析的状态
 	 * 
 	 * @return
@@ -656,10 +690,10 @@ public class SyntaxAnalysis {
 
 	public static void main(String[] args) {
 		SyntaxAnalysis sa = new SyntaxAnalysis();
-		sa.readGrammar("src/main/java/ex2/grammar1.txt");
+//		sa.readGrammar("src/main/java/ex2/grammar1.txt");
 //		sa.readGrammar("src/main/java/ex2/test");
 //		sa.readGrammar("src/main/java/ex2/test3");
-//		sa.readGrammar("src/main/java/ex2/fuzhi");
+		sa.readGrammar("src/main/java/ex2/fuzhi");
 //		sa.readGrammar("src/main/java/ex2/kongzhi");
 //		sa.readGrammar("src/main/java/ex2/shengming");
 		sa.init();
@@ -669,7 +703,9 @@ public class SyntaxAnalysis {
 		sa.getClosure(sa.Clo.get(0));
 		sa.getClo();
 		sa.getSTA();
-		sa.run("(i+i)*i)+i");
+		sa.run("i=i*i+i;");
+//		sa.run("i+i*i");
+//		sa.run("(i+i)*i)+i");
 //		sa.run("fambgae");
 //		sa.run("ti;");
 		sa.printList();

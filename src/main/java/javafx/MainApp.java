@@ -59,7 +59,7 @@ public class MainApp extends Application{
 				FileChooser fileChooser = new FileChooser();
 				File file = fileChooser.showOpenDialog(stage);
 				if (file != null) {
-					System.out.println(file.getPath());
+//					System.out.println(file.getPath());
 					String content = readFile(file);
 					ta_input.setText(content);
 				}
@@ -74,7 +74,7 @@ public class MainApp extends Application{
 				FileChooser fileChooser = new FileChooser();
 				File file = fileChooser.showOpenDialog(stage);
 				if (file != null) {
-					System.out.println(file.getPath());
+//					System.out.println(file.getPath());
 					String content = readFile(file);
 					ta_grammar.setText(content);
 				}
@@ -88,7 +88,7 @@ public class MainApp extends Application{
 				FileChooser fileChooser = new FileChooser();
 				File file = fileChooser.showOpenDialog(stage);
 				if (file != null) {
-					System.out.println(file.getPath());
+//					System.out.println(file.getPath());
 					String content = readFile(file);
 					ta_yf_input.setText(content);
 				}
