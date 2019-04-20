@@ -355,13 +355,16 @@ public class SyntaxAnalysis {
 			}
 			for (String s : Ik) {
 				String str = s.substring(0, s.indexOf("."));
-				if (G.contains(str)) {
+				if (G.contains(str)) {		
 					erYiError("ACTION", k, s.charAt(s.length() - 1)); // 判断是否是二义文法,并记录,做覆盖操作
 					ACTION[k][VT.indexOf(s.charAt(s.length() - 1))] = "r" + G.indexOf(str);
+				} else if (G.contains(str+'ε')){	//空产生式的处理,不检查action表
+//					erYiError("ACTION", k, s.charAt(s.length() - 1)); // 判断是否是二义文法,并记录,做覆盖操作
+					ACTION[k][VT.indexOf(s.charAt(s.length() - 1))] = "r" + G.indexOf(str+'ε');
 				}
 			}
 			if (Ik.contains(G.get(0) + ".,#")) {
-				erYiError("ACTION", k, '#'); // 判断是否是二义文法,并记录,做覆盖操作
+//				erYiError("ACTION", k, '#'); // 判断是否是二义文法,并记录,做覆盖操作      会填入r0，不检查action表
 				ACTION[k][VT.indexOf('#')] = "acc";
 			}
 
@@ -414,7 +417,7 @@ public class SyntaxAnalysis {
 			if (op == null) {
 				String errorInfo = "Error at Line " + (content.length() - buffer.size() + 1) + ": ACTION[" + s + "]["
 						+ a + "]";
-				System.err.println(errorInfo); // TODO 错误处理
+				System.err.println(errorInfo); //  错误处理
 				state.setAction(errorInfo);
 				while (VT.contains(signStack.peek())) { // 弹出符号栈顶的终结符,直至遇到非终结符A
 					signStack.pop();
@@ -440,6 +443,9 @@ public class SyntaxAnalysis {
 			} else if (op.contains("r")) {
 				String g = G.get(t); // 产生式 A→β
 				int n = g.length() - 3;
+				if (g.charAt(3) == 'ε') {			//空产生式不弹栈
+					n = 0;
+				}
 				while (n-- > 0) { // 从栈顶弹出 β个字符
 					signStack.pop();
 					stateStack.pop();
@@ -483,7 +489,7 @@ public class SyntaxAnalysis {
 		for (int i = 0; i < VT.size(); i++) {
 			System.out.print(VT.get(i) + " ");
 		}
-
+		System.out.println("\n\n");
 		System.out.println(printFirst());
 
 		System.out.println(printFollow());
@@ -693,9 +699,10 @@ public class SyntaxAnalysis {
 //		sa.readGrammar("src/main/java/ex2/grammar1.txt");
 //		sa.readGrammar("src/main/java/ex2/test");
 //		sa.readGrammar("src/main/java/ex2/test3");
-		sa.readGrammar("src/main/java/ex2/fuzhi");
+//		sa.readGrammar("src/main/java/ex2/fuzhi");
 //		sa.readGrammar("src/main/java/ex2/kongzhi");
-//		sa.readGrammar("src/main/java/ex2/shengming");
+		sa.readGrammar("src/main/java/ex2/shengming");
+//		sa.readGrammar("src/main/java/ex2/kongchuan.txt");
 		sa.init();
 		sa.getVTVN();
 		sa.getFirst();
@@ -703,11 +710,11 @@ public class SyntaxAnalysis {
 		sa.getClosure(sa.Clo.get(0));
 		sa.getClo();
 		sa.getSTA();
-		sa.run("i=i*i+i;");
+//		sa.run("abab");
 //		sa.run("i+i*i");
 //		sa.run("(i+i)*i)+i");
 //		sa.run("fambgae");
-//		sa.run("ti;");
+		sa.run("ti;");
 		sa.printList();
 
 	}
