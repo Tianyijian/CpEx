@@ -15,6 +15,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
 
+import ex1.Token;
+
 public class SyntaxAnalysis {
 
 	private LinkedList<String> G = new LinkedList<String>(); // 文法
@@ -28,7 +30,8 @@ public class SyntaxAnalysis {
 	private int[][] GOTO;
 	private List<AnalysisState> analysisStates = new ArrayList<AnalysisState>(); // 记录语法分析状态
 	private StringBuilder console = new StringBuilder(); // 记录控制台信息
-
+	private List<Token> tokens = new ArrayList<Token>();	//词法获得的token序列
+	
 	/**
 	 * 从文件读入文法
 	 * 
@@ -277,7 +280,6 @@ public class SyntaxAnalysis {
 					} else {
 						Go.put("(I" + i + ", " + x + ")", "I" + r);
 					}
-
 				}
 			}
 		}
@@ -427,11 +429,10 @@ public class SyntaxAnalysis {
 			String op = ACTION[s][VT.indexOf(a)];
 			state.setAction(op);
 			if (op == null) {
-				String errorInfo = "Error at Line " + (content.length() - buffer.size() + 2) + " Step " + step
-						+ ": ACTION[" + s + "][" + a + "]";
-//				System.err.println(errorInfo); // 错误处理
-				state.setAction(errorInfo);
-				console.append(errorInfo + "\n");
+				Token token = tokens.get((content.length() + 1 - buffer.size()));
+				String error = String.format("Error at Line %d Col %d Step %d: ACTION[%d][%c]", token.getRow(), token.getCol(), step, s, a);
+				state.setAction(error);
+				console.append(error + "\n");
 				while (VT.contains(signStack.peek())) { // 弹出符号栈顶的终结符,直至遇到非终结符A
 					console.append("Pop stack:\t" + signStack.pop());
 					console.append("\t" + stateStack.pop() + "\n");
@@ -448,9 +449,9 @@ public class SyntaxAnalysis {
 				}
 				stateStack.pop(); // 露出状态s
 				char A = signStack.peek();
-				console.append("Remove buffer: " + buffer.poll() + "\n"); // 先把当前错的删除
+				console.append("Remove buffer:\t" + buffer.poll() + "\n"); // 先把当前错的删除
 				while (!Follow.get(A).contains(buffer.peek())) { // 不断读入输入符号,直至遇到a ∈Follow(A)
-					console.append("Remove buffer: " + buffer.poll() + "\n");
+					console.append("Remove buffer:\t" + buffer.poll() + "\n");
 					if (buffer.isEmpty()) { // 缓冲区弹空
 						break;
 					}
@@ -718,6 +719,14 @@ public class SyntaxAnalysis {
 //		Clo.add(new ArrayList<String>() {{add("A->.S,#");}});
 	}
 
+	/**设置token
+	 * @param token
+	 */
+	public void setTokens(List<Token> token) {
+		tokens.clear();
+		tokens.addAll(token);
+	}
+	
 	/**
 	 * 读入文法之后，可用来建分析表
 	 * 

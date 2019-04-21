@@ -1,9 +1,11 @@
 package javafx;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import ex1.Token;
 import ex2.AnalysisState;
 import ex2.Constant;
 import ex2.SyntaxAnalysis;
@@ -79,9 +81,11 @@ public class YFPageController implements Initializable{
     
     private SyntaxAnalysis sa;
     
-
+    public static List<Token> tokens = new ArrayList<Token>();
+    
     @FXML
     void constructSTA(ActionEvent event) {
+//    	System.out.println(tokens.size());
     	sa.readGrammarFromContent(ta_grammar.getText());
     	sa.clearConsole();
     	sa.analysis(sa);
@@ -95,7 +99,7 @@ public class YFPageController implements Initializable{
     
     @FXML
     void analysis(ActionEvent event) {
-    	
+    	sa.setTokens(tokens);
     	String input = ta_yf_input.getText();
     	if (input != null) {
     		if (input.startsWith("Token")) {	//对token文件进行处理
@@ -127,7 +131,7 @@ public class YFPageController implements Initializable{
 
     @FXML
     void getInputFromCF(ActionEvent event) {
-
+//    	System.out.println(tokens.size());
     }
 
     @FXML
@@ -143,7 +147,5 @@ public class YFPageController implements Initializable{
     	ta_yf_result.clear();
     	sa = new SyntaxAnalysis();
     }
-
-
 }
 

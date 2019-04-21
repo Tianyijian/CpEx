@@ -51,6 +51,7 @@ public class MainApp extends Application{
 		TextArea ta_grammar = (TextArea)root.lookup("#ta_grammar");
 		TextArea ta_yf_input = (TextArea)root.lookup("#ta_yf_input");
 		TextArea ta_cf_result = (TextArea)root.lookup("#ta_result");
+		
 		//词法分析读入文件
 		bt_cf_read_input.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -100,6 +101,7 @@ public class MainApp extends Application{
 			@Override
 			public void handle(ActionEvent event) {
 				ta_yf_input.setText("Token:\n" + ta_cf_result.getText());
+//				System.out.println();
 			}
 		});
 	}

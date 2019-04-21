@@ -20,8 +20,9 @@ public class LexicalAnalysis {
 	private List<Integer> lineNum = new ArrayList<>(); // 存储每行的字符数
 	private StringBuffer res = new StringBuffer(); // 存储结果
 	private StringBuilder console = new StringBuilder(); // 存储打印信息
-	private Map<String, SymbolTable> symbolTable = new LinkedHashMap<String, SymbolTable>();	// 符号表
-	
+	private Map<String, SymbolTable> symbolTable = new LinkedHashMap<String, SymbolTable>(); // 符号表
+	private List<Token> tokens = new ArrayList<Token>(); // 存储token序列
+
 	/**
 	 * 传入待分析的代码串，并进行分析
 	 * 
@@ -89,7 +90,7 @@ public class LexicalAnalysis {
 				recogId(); // 识别标识符
 			} else if (isDigit(ch)) {
 				recogDig(); // 识别数字
-			} else if (ch == '/') {	
+			} else if (ch == '/') {
 				recogCom(); // 识别注释
 			} else if (ch == ' ') { // 空格
 				index++;
@@ -122,19 +123,24 @@ public class LexicalAnalysis {
 			}
 			ch = content.charAt(index);
 		}
+		Token token = new Token(zbm.indexOf(word.toString()), "0", lineNum.size() + 1, getColNumByIndex(index)- word.length() +1);
 		if (isGjz(word.toString())) {
 			res.append("(" + zbm.indexOf(word.toString()) + ", 0)\n");
 		} else {
+			token.setType(zbm.indexOf("id"));
 			int r = lookupSymbolTable(word.toString());
 			if (r == -1) { // 判断是否在符号表,不在则加入符号表
 				SymbolTable st = new SymbolTable(symbolTable.size() + 1 + "", word.toString(), "变量");
 				symbolTable.put(word.toString(), st);
-				res.append("(" + zbm.indexOf("id") + ", STIndex: " + symbolTable.size()+")\n");
+				res.append("(" + zbm.indexOf("id") + ", STIndex: " + symbolTable.size() + ")\n");
+				token.setField("STIndex: " + symbolTable.size());
 			} else {
 				res.append("(" + zbm.indexOf("id") + ", STIndex: " + r + ")\n");
+				token.setField("STIndex: " + r);
 			}
-
+			
 		}
+		tokens.add(token);
 	}
 
 	/**
@@ -166,14 +172,17 @@ public class LexicalAnalysis {
 			ch = content.charAt(index);
 		}
 		if (word.toString().matches("[0-9]+\\.?[0-9]*(e[+-]?[0-9]+)?")) {
+			Token token = new Token(0, word.toString(), lineNum.size() + 1, getColNumByIndex(index) -  word.length() + 1);
 			if (word.toString().contains(".")) {
 				res.append("(" + zbm.indexOf("ureal") + "," + word.toString() + ")\n");
-
+				token.setType(zbm.indexOf("ureal"));
 			} else {
 				res.append("(" + zbm.indexOf("uint") + "," + word.toString() + ")\n");
+				token.setType(zbm.indexOf("uint"));
 			}
+			tokens.add(token);
 		} else {
-			console.append("Digit error in line " + (lineNum.size() + 1) + ": " + word.toString()+ "\n");
+			console.append("Digit error in line " + (lineNum.size() + 1) + ": " + word.toString() + "\n");
 		}
 	}
 
@@ -189,7 +198,7 @@ public class LexicalAnalysis {
 		while (true) {
 			index++;
 			if (index >= content.length()) {
-				console.append("Comment not end in line " + (lineNum.size() + 1) + ": " +sb.toString() + "\n");
+				console.append("Comment not end in line " + (lineNum.size() + 1) + ": " + sb.toString() + "\n");
 				return;
 			}
 			ch = content.charAt(index);
@@ -219,21 +228,26 @@ public class LexicalAnalysis {
 	 */
 	private void recogDel() {
 		char ch = content.charAt(index);
-		
+
 		if (isDel(ch)) { // 单个界符或者运算符
+			Token token = new Token(0, "0", lineNum.size() + 1, getColNumByIndex(index) + 1);
 			if (index < content.length() - 1) {
 				String str = content.substring(index, index + 2);
 				if (isDDel(str)) { // 双运算符
 					res.append("(" + zbm.indexOf(str) + ", 0)\n");
+					token.setType(zbm.indexOf(str));
+					tokens.add(token);
 					index += 2;
 					return;
 				}
 
 			}
-			if (ch == '!') {	//‘!=’为合法运算符，‘!’为不合法字符
+			if (ch == '!') { // ‘!=’为合法运算符，‘!’为不合法字符
 				error();
 			}
 			res.append("(" + zbm.indexOf(ch + "") + ", 0)\n");
+			token.setType(zbm.indexOf(ch + ""));
+			tokens.add(token);
 			index++;
 		}
 
@@ -290,7 +304,9 @@ public class LexicalAnalysis {
 		return false;
 	}
 
-	/**判断是否是浮点数或者科学计数法
+	/**
+	 * 判断是否是浮点数或者科学计数法
+	 * 
 	 * @param ch
 	 * @return
 	 */
@@ -300,6 +316,7 @@ public class LexicalAnalysis {
 		}
 		return false;
 	}
+
 	/**
 	 * 判断是否是字母或者下划线
 	 * 
@@ -359,7 +376,6 @@ public class LexicalAnalysis {
 		console.append(String.format("illegal char: (%d row, %d col)\n", line, index + 1 - sum));
 	}
 
-
 	/**
 	 * 返回符号表
 	 * 
@@ -389,5 +405,35 @@ public class LexicalAnalysis {
 	 */
 	public String getConsole() {
 		return console.toString();
+	}
+
+	/**
+	 * 返回token的输出结果
+	 * 
+	 * @return
+	 */
+	public String getTokenResult() {
+		StringBuilder res = new StringBuilder();
+		for (int i = 0; i < tokens.size(); i++) {
+			Token token = tokens.get(i);
+			res.append("(" + token.getType() + ", " + token.getField() + ")\n");
+//			res.append(tokens.get(i).toString()+"\n");
+		}
+		return res.toString();
+	}
+
+	/**
+	 * 清除tokens
+	 */
+	public void cleanTokens() {
+		tokens.clear();
+	}
+	/**
+	 * 返回tokens
+	 * 
+	 * @return
+	 */
+	public List<Token> getTokens() {
+		return tokens;
 	}
 }

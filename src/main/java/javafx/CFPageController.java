@@ -47,6 +47,8 @@ public class CFPageController implements Initializable{
 	@FXML
 	private TableColumn<BianMa, String> tc_dcmc;
 	
+	LexicalAnalysis la;
+	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		tc_lbbm.setCellValueFactory(CellData -> CellData.getValue().id());
@@ -70,18 +72,21 @@ public class CFPageController implements Initializable{
 		
 		String content = ta_input.getText();
 //		System.out.println("content:" + content+ "--");
-		LexicalAnalysis la = new LexicalAnalysis(content);
-		String res = la.getResult();
-		ta_result.setText(res);
+		la = new LexicalAnalysis(content);
+		ta_result.setText(la.getTokenResult());
 		ta_console.setText(la.getConsole());
 		List<SymbolTable> symbolTables = la.getSymbolTables();
 		tv_fhb.setItems(FXCollections.observableList(symbolTables));
+		
+		YFPageController.tokens.clear();
+		YFPageController.tokens.addAll(la.getTokens());
 	}
 	@FXML
 	public void clear() {
 		ta_input.clear();
 		ta_result.clear();
 		ta_console.clear();
+		la.cleanTokens();
 		tv_fhb.setItems(FXCollections.observableArrayList());
 	}
 }
