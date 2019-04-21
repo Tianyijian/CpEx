@@ -24,10 +24,10 @@ public class SyntaxAnalysis {
 	private List<Character> VT = new ArrayList<Character>(); // 终结符
 	private Map<Character, Set<Character>> First = new HashMap<Character, Set<Character>>();// 非终结符的First集
 	private Map<Character, Set<Character>> Follow = new HashMap<Character, Set<Character>>();// 非终结符的Follow集
-	private List<List<String>> Clo = new ArrayList<List<String>>(); // 闭包
+	private List<List<String>> Clo = new ArrayList<List<String>>(); // 项目集规范族
 	private Map<String, String> Go = new LinkedHashMap<String, String>();// 转移函数
-	private String[][] ACTION;
-	private int[][] GOTO;
+	private String[][] ACTION; // ACTION表
+	private int[][] GOTO; // GOTO表
 	private List<AnalysisState> analysisStates = new ArrayList<AnalysisState>(); // 记录语法分析状态
 	private StringBuilder console = new StringBuilder(); // 记录控制台信息
 	private List<Token> tokens = new ArrayList<Token>(); // 词法获得的token序列
