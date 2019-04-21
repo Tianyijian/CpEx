@@ -50,6 +50,8 @@ public class Constant {
 			put("==", "l");
 			put("!=", "m");
 			put("call", "h");
+			put("Elist", "u");
+			put("return", "c");
 		}
 	};
 	

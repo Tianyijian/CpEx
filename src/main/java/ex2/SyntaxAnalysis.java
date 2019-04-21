@@ -430,7 +430,7 @@ public class SyntaxAnalysis {
 			state.setAction(op);
 			if (op == null) {
 				String error = String.format("Error at Step %d: ACTION[%d][%c]", step, s, a);
-				if (tokens.size() > 0) { // 若从词法读入token,则可记录位置信息
+				if (tokens.size() > 0 && buffer.size() > 1) { // 若从词法读入token,则可记录位置信息
 					Token token = tokens.get((content.length() + 1 - buffer.size()));
 					error = String.format("Error at Line %d Col %d Step %d: ACTION[%d][%c]", token.getRow(),
 							token.getCol(), step, s, a);
@@ -750,7 +750,7 @@ public class SyntaxAnalysis {
 
 	public static void main(String[] args) {
 		SyntaxAnalysis sa = new SyntaxAnalysis();
-		sa.readGrammar("src/main/java/ex2/ALL_wf.txt");
+		sa.readGrammar("src/main/java/ex2/ALL_wf2.txt");
 		sa.init();
 		sa.getVTVN();
 		sa.getFirst();
@@ -758,7 +758,7 @@ public class SyntaxAnalysis {
 		sa.getClosure(sa.Clo.get(0));
 		sa.getClo();
 		sa.getSTA();
-		sa.clearConsole();
+//		sa.clearConsole();
 //		sa.run("ti;ri;i=d;i=d;f(ijdya)gi=i*d+d;ei=i*(i+d);w(imd)vi=i+d;");
 		sa.run("i=i+i*i;");
 		sa.printList();
