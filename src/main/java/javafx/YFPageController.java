@@ -106,6 +106,7 @@ public class YFPageController implements Initializable{
     			input = SyntaxAnalysis.readToken(input.substring(input.indexOf("(")));
 //        		ta_yf_input.setText(ta_yf_input.getText() +"\n\n" +  input);
     		}
+    		input = input.replaceAll("\n", "").replaceAll("\\s+", "");
 //    		System.out.println(input);
         	sa.run(input);
     		List<AnalysisState> res = sa.getAnalysisStates();

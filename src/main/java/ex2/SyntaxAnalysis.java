@@ -30,8 +30,8 @@ public class SyntaxAnalysis {
 	private int[][] GOTO;
 	private List<AnalysisState> analysisStates = new ArrayList<AnalysisState>(); // 记录语法分析状态
 	private StringBuilder console = new StringBuilder(); // 记录控制台信息
-	private List<Token> tokens = new ArrayList<Token>();	//词法获得的token序列
-	
+	private List<Token> tokens = new ArrayList<Token>(); // 词法获得的token序列
+
 	/**
 	 * 从文件读入文法
 	 * 
@@ -429,8 +429,12 @@ public class SyntaxAnalysis {
 			String op = ACTION[s][VT.indexOf(a)];
 			state.setAction(op);
 			if (op == null) {
-				Token token = tokens.get((content.length() + 1 - buffer.size()));
-				String error = String.format("Error at Line %d Col %d Step %d: ACTION[%d][%c]", token.getRow(), token.getCol(), step, s, a);
+				String error = String.format("Error at Step %d: ACTION[%d][%c]", step, s, a);
+				if (tokens.size() > 0) { // 若从词法读入token,则可记录位置信息
+					Token token = tokens.get((content.length() + 1 - buffer.size()));
+					error = String.format("Error at Line %d Col %d Step %d: ACTION[%d][%c]", token.getRow(),
+							token.getCol(), step, s, a);
+				}
 				state.setAction(error);
 				console.append(error + "\n");
 				while (VT.contains(signStack.peek())) { // 弹出符号栈顶的终结符,直至遇到非终结符A
@@ -536,7 +540,7 @@ public class SyntaxAnalysis {
 		for (int i = 0; i < analysisStates.size(); i++) {
 			System.out.println(analysisStates.get(i));
 		}
-		
+
 		System.out.println();
 		System.err.println(printConsole());
 	}
@@ -719,14 +723,16 @@ public class SyntaxAnalysis {
 //		Clo.add(new ArrayList<String>() {{add("A->.S,#");}});
 	}
 
-	/**设置token
+	/**
+	 * 设置token
+	 * 
 	 * @param token
 	 */
 	public void setTokens(List<Token> token) {
 		tokens.clear();
 		tokens.addAll(token);
 	}
-	
+
 	/**
 	 * 读入文法之后，可用来建分析表
 	 * 
@@ -753,7 +759,8 @@ public class SyntaxAnalysis {
 		sa.getClo();
 		sa.getSTA();
 		sa.clearConsole();
-		sa.run("ti;ri;i=d;i=d;f(ijdya)gi=i*d+d;ei=i*(i+d);w(imd)vi=i+d;");
+//		sa.run("ti;ri;i=d;i=d;f(ijdya)gi=i*d+d;ei=i*(i+d);w(imd)vi=i+d;");
+		sa.run("i=i+i*i;");
 		sa.printList();
 	}
 }
