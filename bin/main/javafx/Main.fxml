@@ -19,6 +19,11 @@
               <fx:include fx:id="yfPage" source="yfPage.fxml" />
             </content>
           </Tab>
+          <Tab text="语义分析">
+            <content>
+              <fx:include fx:id="yyPage" source="yyPage.fxml" />
+            </content>
+          </Tab>
         </tabs>
       </TabPane>
    </children>

@@ -11,7 +11,7 @@ F -> digit
 F -> id
 
 S -> if B then S else S
-S -> while ( B ) do S
+S -> while B do S
 B -> B or A | A
 A -> A and C | C
 C -> not C | ( B ) | E relop E | true | false    

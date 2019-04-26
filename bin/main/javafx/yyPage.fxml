@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="620.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafx.YYPageController">
+   <children>
+      <TableView fx:id="tv_fhb" layoutX="55.0" layoutY="375.0" prefHeight="230.0" prefWidth="400.0">
+         <columns>
+            <TableColumn fx:id="tc_symbol_index" prefWidth="40.0" text="序号" />
+            <TableColumn fx:id="tc_symbol_name" prefWidth="60.0" text="名字" />
+            <TableColumn fx:id="tc_symbol_type" prefWidth="60.0" text="符号种类" />
+            <TableColumn fx:id="tc_symbol_attribute" prefWidth="60.0" text="类型" />
+            <TableColumn fx:id="tc_symbol_value" prefWidth="60.0" text="值" />
+            <TableColumn fx:id="tc_symbol_addr" prefWidth="60.0" text="地址" />
+            <TableColumn fx:id="tc_symbol_extend" prefWidth="60.0" text="扩展属性" />
+         </columns>
+      </TableView>
+      <Button fx:id="bt_yy_analysis" layoutX="700.0" layoutY="25.0" mnemonicParsing="false" onAction="#yyAnalysis" prefHeight="20.0" prefWidth="80.0" text="语义分析" />
+      <TextArea fx:id="ta_yy_console" layoutX="775.0" layoutY="375.0" prefHeight="230.0" prefWidth="400.0" />
+      <Label layoutX="779.0" layoutY="351.0" text="打印信息：" />
+   </children>
+</AnchorPane>

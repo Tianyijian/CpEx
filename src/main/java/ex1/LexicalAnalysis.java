@@ -132,11 +132,11 @@ public class LexicalAnalysis {
 			if (r == -1) { // 判断是否在符号表,不在则加入符号表
 				SymbolTable st = new SymbolTable(symbolTable.size() + 1 + "", word.toString(), "变量");
 				symbolTable.put(word.toString(), st);
-				res.append("(" + zbm.indexOf("id") + ", STIndex: " + symbolTable.size() + ")\n");
-				token.setField("STIndex: " + symbolTable.size());
+				res.append("(" + zbm.indexOf("id") + ", STIndex: " + word.toString() + ")\n");
+				token.setField("STIndex: " + word.toString());
 			} else {
-				res.append("(" + zbm.indexOf("id") + ", STIndex: " + r + ")\n");
-				token.setField("STIndex: " + r);
+				res.append("(" + zbm.indexOf("id") + ", STIndex: " + word.toString() + ")\n");
+				token.setField("STIndex: " + word.toString());
 			}
 			
 		}
@@ -435,5 +435,12 @@ public class LexicalAnalysis {
 	 */
 	public List<Token> getTokens() {
 		return tokens;
+	}
+	
+	/**返回symbolTable
+	 * @return
+	 */
+	public Map<String, SymbolTable> getSymbolTable() {
+		return symbolTable;
 	}
 }
