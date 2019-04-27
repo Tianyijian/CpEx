@@ -10,13 +10,14 @@ import ex1.SymbolTable;
 import ex1.Token;
 import ex2.Constant;
 
-public class SemanticTranslate {
+public class SemanticAnalysis {
 
 	private static int offset = 0;
 	public static Map<String, SymbolTable> symbolTable = new LinkedHashMap<String, SymbolTable>(); // 符号表
 	private static Map<String, Declaration> declarMap = new LinkedHashMap<String, Declaration>(); // 记录声明语句中的属性
 	private static Map<String, Stack<String>> fuZhiMap = new LinkedHashMap<String, Stack<String>>(); // 记录赋值语句中的属性
-	private static Map<String, Stack<BoolExpression>> boolMap = new LinkedHashMap<String, Stack<BoolExpression>>();	//记录布尔表达式的属性
+	private static Map<String, Stack<BoolExpression>> boolMap = new LinkedHashMap<String, Stack<BoolExpression>>(); // 记录布尔表达式的属性
+	private static Stack<Integer> mStack = new Stack<Integer>(); // 布尔表达式中的 M
 	private static List<String> temp = new ArrayList<String>(); // 临时变量
 	public static List<Token> tokens = new ArrayList<Token>(); // 词法获得的token序列
 //	private static StringBuilder console = new StringBuilder(); // 控制台打印
@@ -24,7 +25,7 @@ public class SemanticTranslate {
 	private static int[] tokensArray;
 
 	public static void trans(String g, int index) {
-		if (g.equals("X->t")) {
+		if (g.equals("X->t")) { // 声明语句的翻译
 			Declaration declar = new Declaration("X", "integer", 4);
 			declarMap.put("X", declar);
 		} else if (g.equals("X->r")) {
@@ -36,7 +37,7 @@ public class SemanticTranslate {
 			symbolTable.get(name).setAddress((offset + ""));
 			offset += declarMap.get("X").getWidth();
 			setTokenArray(index, 2);
-		} else if (g.equals("S->i=E;")) {
+		} else if (g.equals("S->i=E;")) { // 赋值语句的翻译
 			String name = getSTName(index, 4);
 			int r = lookupSymbolTable(name);
 			if (r == -1) {
@@ -67,7 +68,7 @@ public class SemanticTranslate {
 			fuZhiMap.get("F").push(fuZhiMap.get("E").pop());
 			setTokenArray(index, 2);
 		} else if (g.equals("F->d")) {
-			Token token = tokens.get(index - 1);
+			Token token = tokens.get(index - 1); // TODO
 			String t = newConstantTemp(token.getType(), token.getField());
 			fuZhiMap.get("F").push(t);
 		} else if (g.equals("F->i")) {
@@ -78,9 +79,7 @@ public class SemanticTranslate {
 			} else {
 				fuZhiMap.get("F").push(name);
 			}
-		} else if (g.equals("F->(E)")) {
-
-		} else if (g.equals("C->a")) {
+		} else if (g.equals("C->a")) { // 布尔表达式的翻译
 			BoolExpression C = new BoolExpression();
 			C.setTrueList(makeList(code.size()));
 			boolMap.get("C").push(C);
@@ -94,19 +93,23 @@ public class SemanticTranslate {
 			BoolExpression B = boolMap.get("B").pop();
 			BoolExpression C = new BoolExpression(B.getTrueList(), B.getFalseList());
 			boolMap.get("C").push(C);
+			setTokenArray(index, 2);
 		} else if (g.equals("C->zC")) {
 			BoolExpression zC = boolMap.get("C").pop();
 			BoolExpression C = new BoolExpression(zC.getFalseList(), zC.getTrueList());
 			boolMap.get("C").push(C);
+			setTokenArray(index, 1);
 		} else if (g.equals("C->ERE")) {
 			BoolExpression C = new BoolExpression();
 			C.setTrueList(makeList(code.size()));
-			C.setFalseList(makeList(code.size()+1));
+			C.setFalseList(makeList(code.size() + 1));
 			String e2addr = fuZhiMap.get("E").pop();
 			String e1addr = fuZhiMap.get("E").pop();
 			boolMap.get("C").push(C);
-			genCode("jrelop", e1addr, e2addr, "-");
+			String relop = Constant.zbm.get(getTokens(index, 2).getType());
+			genCode("j" + relop, e1addr, e2addr, "-");
 			genCode("j", "-", "-", "-");
+			setTokenArray(index, 2);
 		} else if (g.equals("A->C")) {
 			BoolExpression C = boolMap.get("C").pop();
 			BoolExpression A = new BoolExpression(C.getTrueList(), C.getFalseList());
@@ -115,25 +118,43 @@ public class SemanticTranslate {
 			BoolExpression A = boolMap.get("A").pop();
 			BoolExpression B = new BoolExpression(A.getTrueList(), A.getFalseList());
 			boolMap.get("B").push(B);
-		} else if (g.equals("B->BxA")) {
-			
-		} else if (g.equals("A->AyC")) {
-			
+		} else if (g.equals("B->BxMA")) {
+			BoolExpression B = new BoolExpression();
+			BoolExpression B1 = boolMap.get("B").pop();
+			BoolExpression A = boolMap.get("A").pop();
+			backPactch(B1.getFalseList(), mStack.pop());
+			B.setTrueList(merge(B1.getTrueList(), A.getTrueList()));
+			B.setFalseList(A.getFalseList());
+			boolMap.get("B").push(B);
+			setTokenArray(index, 2);
+		} else if (g.equals("A->AyMC")) {
+			BoolExpression A = new BoolExpression();
+			BoolExpression A1 = boolMap.get("A").pop();
+			BoolExpression C = boolMap.get("C").pop();
+			backPactch(A1.getTrueList(), mStack.pop());
+			A.setTrueList(C.getTrueList());
+			A.setFalseList(merge(A1.getFalseList(), C.getFalseList()));
+			boolMap.get("A").push(A);
+			setTokenArray(index, 2);
+		} else if (g.equals("M->ε")) {
+			mStack.push(code.size());
 		}
 	}
-	
+
 	public static void init() {
-		String[] fzN = new String[] {"F", "T", "E"};
-		for (int i = 0; i < fzN.length;i++) {
+		String[] fzN = new String[] { "F", "T", "E" };
+		for (int i = 0; i < fzN.length; i++) {
 			fuZhiMap.put(fzN[i], new Stack<String>());
 		}
-		String[] boolN = new String[] {"B", "A", "C"};
-		for (int i = 0; i < boolN.length;i++) {
+		String[] boolN = new String[] { "B", "A", "C" };
+		for (int i = 0; i < boolN.length; i++) {
 			boolMap.put(boolN[i], new Stack<BoolExpression>());
 		}
 	}
 
-	/**创建一个只包含i的列表，i是跳转指令的标号
+	/**
+	 * 创建一个只包含i的列表，i是跳转指令的标号
+	 * 
 	 * @param i
 	 * @return 新列表的指针
 	 */
@@ -142,8 +163,10 @@ public class SemanticTranslate {
 		list.add(i);
 		return list;
 	}
-	
-	/** 合并两个列表
+
+	/**
+	 * 合并两个列表
+	 * 
 	 * @param l1
 	 * @param l2
 	 * @return 新列表的指针
@@ -154,33 +177,23 @@ public class SemanticTranslate {
 		list.addAll(l2);
 		return list;
 	}
-	
-	/**将i作为目标标号插入到p所指列表中的各指令中
+
+	/**
+	 * 将i作为目标标号插入到p所指列表中的各指令中
+	 * 
 	 * @param list
 	 * @param i
 	 */
 	private static void backPactch(List<Integer> list, Integer i) {
-		for (int j = 0; j < list.size();j++) {
-			code.get(list.get(j)).setResult(i+"");
+		for (int j = 0; j < list.size(); j++) {
+			code.get(list.get(j)).setResult(i + "");
 		}
 	}
-	/**生成一个用于存放标号的新的临时变量L，返回变量地址
-	 * @return
-	 */
-	private static String newLabel() {
-		String L = "L";
-		return L;
-	}
-	
-	/**将下一条三地址指令的标号赋给L
-	 * @param L
-	 */
-	private static void label(String L) {
-		
-	}
-	
-	/**为常数新建一个临时变量
-	 * @param type 种别码值
+
+	/**
+	 * 为常数新建一个临时变量
+	 * 
+	 * @param type  种别码值
 	 * @param field 值
 	 * @return
 	 */
@@ -188,32 +201,33 @@ public class SemanticTranslate {
 		String t = "t" + (temp.size() + 1);
 		temp.add(t);
 		if (type == Constant.zbm.indexOf("uint")) {
-			SymbolTable st = new SymbolTable(symbolTable.size()+ 1 +"", t, "临时变量", "integer", field, offset + "", "");
+			SymbolTable st = new SymbolTable(symbolTable.size() + 1 + "", t, "临时变量", "integer", field, offset + "", "");
 			symbolTable.put(t, st);
 			offset += 4;
 		} else {
-			SymbolTable st = new SymbolTable(symbolTable.size()+ 1 +"", t, "临时变量", "real", field, offset + "", "");
+			SymbolTable st = new SymbolTable(symbolTable.size() + 1 + "", t, "临时变量", "real", field, offset + "", "");
 			symbolTable.put(t, st);
 			offset += 8;
 		}
 		return t;
 	}
+
 	/**
 	 * 生成一个新的临时变量t,返回t的地址
 	 * 
 	 * @return
 	 */
 	public static String newTemp(String e1, String e2) {
-		String attr1 = symbolTable.get(e1).getAttribute();		//计算该新建的临时变量的类型
+		String attr1 = symbolTable.get(e1).getAttribute(); // 计算该新建的临时变量的类型
 		String attr2 = symbolTable.get(e2).getAttribute();
 		String t = "t" + (temp.size() + 1);
 		temp.add(t);
 		if (attr1.equals("real") || attr2.equals("real")) {
-			SymbolTable st = new SymbolTable(symbolTable.size()+ 1 +"", t, "临时变量", "real", "", offset + "", "");
+			SymbolTable st = new SymbolTable(symbolTable.size() + 1 + "", t, "临时变量", "real", "", offset + "", "");
 			symbolTable.put(t, st);
 			offset += 8;
 		} else {
-			SymbolTable st = new SymbolTable(symbolTable.size()+ 1 +"", t, "临时变量", "integer", "", offset + "", "");
+			SymbolTable st = new SymbolTable(symbolTable.size() + 1 + "", t, "临时变量", "integer", "", offset + "", "");
 			symbolTable.put(t, st);
 			offset += 4;
 		}
@@ -244,6 +258,22 @@ public class SemanticTranslate {
 		}
 		String field = tokens.get(index).getField(); // (1, STIndex: 1)
 		return field.substring(field.indexOf(":") + 2);
+	}
+
+	/**
+	 * 从token序列中获得某个token
+	 * 
+	 * @param index
+	 * @param before
+	 * @return
+	 */
+	public static Token getTokens(int index, int before) {
+		while (before > 0) {
+			if (tokensArray[--index] == 0) {
+				before--;
+			}
+		}
+		return tokens.get(index);
 	}
 
 	/**
@@ -293,8 +323,8 @@ public class SemanticTranslate {
 	 * @param tokens
 	 */
 	public static void setTokens(List<Token> tokens) {
-		SemanticTranslate.tokens.clear();
-		SemanticTranslate.tokens.addAll(tokens);
+		SemanticAnalysis.tokens.clear();
+		SemanticAnalysis.tokens.addAll(tokens);
 		tokensArray = new int[tokens.size()];
 	}
 
@@ -309,5 +339,12 @@ public class SemanticTranslate {
 			res.append(code.get(i).toString() + "\n");
 		}
 		return res.toString();
+	}
+
+	/**
+	 * 清空
+	 */
+	public static void clear() {
+		SemanticAnalysis.code.clear();
 	}
 }

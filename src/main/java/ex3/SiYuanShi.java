@@ -45,7 +45,7 @@ public class SiYuanShi {
 	}
 	@Override
 	public String toString() {
-		return "(" + op + ", " + arg1 + ", " + arg2 + ", " + result + ")";
+		return "(" + op + ",\t" + arg1 + ",\t" + arg2 + ",\t" + result + ")";
 	}
 	
 	

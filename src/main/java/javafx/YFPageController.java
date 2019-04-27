@@ -9,7 +9,7 @@ import ex1.Token;
 import ex2.AnalysisState;
 import ex2.Constant;
 import ex2.SyntaxAnalysis;
-import ex3.SemanticTranslate;
+import ex3.SemanticAnalysis;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -100,7 +100,8 @@ public class YFPageController implements Initializable{
     
     @FXML
     void analysis(ActionEvent event) {
-    	SemanticTranslate.init();
+    	SemanticAnalysis.init();
+    	SemanticAnalysis.clear();
     	sa.setTokens(tokens);
     	String input = ta_yf_input.getText();
     	if (input != null) {

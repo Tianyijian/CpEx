@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.Stack;
 
 import ex1.Token;
-import ex3.SemanticTranslate;
+import ex3.SemanticAnalysis;
 
 public class SyntaxAnalysis {
 
@@ -474,7 +474,7 @@ public class SyntaxAnalysis {
 				buffer.poll();
 			} else if (op.contains("r")) {
 				String g = G.get(t); // 产生式 A→β
-				SemanticTranslate.trans(g, content.length() + 1 - buffer.size());
+				SemanticAnalysis.trans(g, content.length() + 1 - buffer.size());
 				int n = g.length() - 3;
 				if (g.charAt(3) == 'ε') { // 空产生式不弹栈
 					n = 0;

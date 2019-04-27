@@ -7,7 +7,7 @@ import java.util.ResourceBundle;
 import ex1.LexicalAnalysis;
 import ex1.SymbolTable;
 import ex2.Constant;
-import ex3.SemanticTranslate;
+import ex3.SemanticAnalysis;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -81,16 +81,16 @@ public class CFPageController implements Initializable{
 		
 		YFPageController.tokens.clear();
 		YFPageController.tokens.addAll(la.getTokens());
-		SemanticTranslate.setTokens(la.getTokens());
-		SemanticTranslate.symbolTable.clear();
-		SemanticTranslate.symbolTable.putAll(la.getSymbolTable());
+		SemanticAnalysis.setTokens(la.getTokens());
+		SemanticAnalysis.symbolTable.clear();
+		SemanticAnalysis.symbolTable.putAll(la.getSymbolTable());
 	}
 	@FXML
 	public void clear() {
 		ta_input.clear();
 		ta_result.clear();
 		ta_console.clear();
-		la.cleanTokens();
+//		la.cleanTokens();s
 		tv_fhb.setItems(FXCollections.observableArrayList());
 	}
 }

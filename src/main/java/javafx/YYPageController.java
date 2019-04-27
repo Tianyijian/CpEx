@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import ex1.SymbolTable;
-import ex3.SemanticTranslate;
+import ex3.SemanticAnalysis;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -45,9 +45,9 @@ public class YYPageController implements Initializable{
 
     @FXML
     void yyAnalysis(ActionEvent event) {
-		List<SymbolTable> symbolTables = SemanticTranslate.getSymbolTables();
+		List<SymbolTable> symbolTables = SemanticAnalysis.getSymbolTables();
 //		System.out.println("yyAnalysis: " + symbolTables.size());
 		tv_fhb.setItems(FXCollections.observableList(symbolTables));
-		ta_yy_console.setText(SemanticTranslate.getCode());
+		ta_yy_console.setText(SemanticAnalysis.getCode());
     }
 }
