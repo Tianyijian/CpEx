@@ -1,0 +1,32 @@
+P -> D P | ε
+P -> S M P		{backpatch(S.nextlist, M.quad)}
+ 
+D -> X id ;		{enter(id.lexeme, X.type, offset); offset:= offset + X.width}
+X -> integer	{X.type := integer; X.width := 4} 
+X -> real		{X.type := real; X.width := 8}
+
+S -> id = E ;	{p:= lookup(id.lexeme); if p == nil then error;gencode(p'='E.addr);}
+E -> E1 + T 	{E.addr:=newtemp;gencode(E.addr ':='E1.addr'+'T.addr)}
+E -> T			{E.addr:= T.addr}
+T -> T1 * F 	{T.addr:=newtemp;gencode(T.addr ':='T1.addr'*'F.addr)}
+T -> F			{T.addr:= F.addr}
+F -> ( E ) 		{F.addr:= E.addr}
+F -> digit		{F.addr:= newtemp(digit)}
+F -> id			{F.addr:= lookup(id.lexeme); if F.addr == nil then error;}
+
+S -> if B then M1 S1 N else M2 S2	{backpatch(B.truelist, M1.quad);backpatch(B.falselist, M2.quad);S.nextlist := merge(S1.nextlist, merge(N.nextlist, S2.nextlist))}
+ 
+S -> while M1 B do M2 S1 	{backpatch(S1.nextlist, M1.quad);backpatch(B.truelist,M2.quad);S.nextlist:=B.falselist; gencode('goto'M1.quad)}
+
+B -> B1 or M A 	{backpatch(B1.falselist, M.quad);B.truelist := merge(B1.truelist, A.truelist);B.falselist := A.falselist}
+B -> A			{B.truelist := A.truelist; B.falselist := A.falselist}
+A -> A1 and M C {backpatch(A1.truelist, M.quad); A.truelist := C.truelist;A.falselist := merge(A1.falselist, C.falselist)}
+A -> C			{A.truelist := C.truelist; A.falselist := C.falselist}
+C -> not C 		{C.truelist := B.falselist; C.falselist := B.truelist}
+C -> ( B ) 		{C.truelist := B.truelist; C.falselist := B.falselist}
+C -> E1 relop E2 {C.truelist :=makelist(nextquad);C.falselist := makelist(nextquad+1);gencode('if' E1.addr relop E1.addr 'goto –');gencode('goto –')}
+C -> true 		{C.truelist := makelist(nextquad); gencode('goto –')}
+C -> false 		{C.falselist := makelist(nextquad); gencode('goto –')}
+M -> ε			{M.quad := nextquad}
+N -> ε			{N.nextlist := makelist(nextquad); gencode('goto –')}
+relop -> < | <= | == | != | > | >= 

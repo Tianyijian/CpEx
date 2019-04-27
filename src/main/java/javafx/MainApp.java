@@ -122,6 +122,11 @@ public class MainApp extends Application{
 //					String content = readFile(file);
 //					ta_yy_sdt.setText(content);
 //				}
+				File file = new File("./src/main/java/ex3/All_wf_sdt.txt");
+				if (file != null) {
+					String content = readFile(file);
+					ta_yy_sdt.setText(content);
+				}
 			}
 		});
 	}
