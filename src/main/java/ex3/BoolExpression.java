@@ -1,5 +1,6 @@
 package ex3;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BoolExpression {
@@ -9,6 +10,8 @@ public class BoolExpression {
 	
 	public BoolExpression() {
 		super();
+		this.trueList = new ArrayList<Integer>();
+		this.falseList = new ArrayList<Integer>();
 	}
 	
 	

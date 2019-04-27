@@ -1,5 +1,5 @@
-P -> D P | S P | ε | B
-
+P -> D P | S M P| ε
+ 
 D -> X id ;
 X -> integer | real
 

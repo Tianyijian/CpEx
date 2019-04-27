@@ -169,8 +169,8 @@ public class SemanticAnalysis {
 			N.setNextList(makeList(nextQuad()));
 			genCode("j", "-", "-", "-");
 			controlMap.get("N").push(N);
-		} else if (g.equals("")) {
-
+		} else if (g.equals("P->SMP")) {
+			backPactch(controlMap.get("S").pop().getNextList(), mStack.pop());
 		}
 	}
 
@@ -183,7 +183,7 @@ public class SemanticAnalysis {
 		for (int i = 0; i < boolN.length; i++) {
 			boolMap.put(boolN[i], new Stack<BoolExpression>());
 		}
-		String[] controlN = new String[] { "S", "N" };
+		String[] controlN = new String[] { "S", "N", "P"};
 		for (int i = 0; i < controlN.length; i++) {
 			controlMap.put(controlN[i], new Stack<Sentiment>());
 		}
