@@ -6,3 +6,4 @@ b = 1.0;
 if (a <= 10 and true) then a = a*10 + 1; else a = a * (a+1);
 /*测试循环结构*/
 while ( b != 10.0) do b = b + 1.0;
+b = a + 2.0 * 3;

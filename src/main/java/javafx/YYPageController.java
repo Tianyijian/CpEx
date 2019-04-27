@@ -18,12 +18,29 @@ import javafx.scene.control.cell.PropertyValueFactory;
 
 public class YYPageController implements Initializable{
 
-
+	@FXML
+	private Button bt_yy_clear;
+	
+	@FXML
+	private Button bt_yy_input;
+	
+    @FXML
+    private TextArea ta_yy_sdt;
+	
     @FXML
     private Button bt_yy_analysis;
     
     @FXML
     private TextArea ta_yy_console;
+    
+    @FXML
+    private TextArea ta_yy_grammar;
+
+    @FXML
+    private TextArea ta_yy_input;
+    
+    @FXML
+    private TextArea ta_yy_result;
     
     @FXML
     private TableView<SymbolTable> tv_fhb;
@@ -48,6 +65,17 @@ public class YYPageController implements Initializable{
 		List<SymbolTable> symbolTables = SemanticAnalysis.getSymbolTables();
 //		System.out.println("yyAnalysis: " + symbolTables.size());
 		tv_fhb.setItems(FXCollections.observableList(symbolTables));
-		ta_yy_console.setText(SemanticAnalysis.getCode());
+		ta_yy_result.setText(SemanticAnalysis.getCode());
+		ta_yy_console.setText(SemanticAnalysis.getConsole());
+    }
+
+    @FXML
+    void yyClear(ActionEvent event) {
+    	ta_yy_input.clear();
+    	ta_yy_grammar.clear();
+    	ta_yy_console.clear();
+    	ta_yy_result.clear();
+    	ta_yy_sdt.clear();
+    	tv_fhb.setItems(FXCollections.observableArrayList());
     }
 }

@@ -47,10 +47,14 @@ public class MainApp extends Application{
 		Button bt_yf_read_grammar = (Button) root.lookup("#bt_read_grammar");
 		Button bt_yf_read_input = (Button) root.lookup("#bt_read_input");
 		Button bt_yf_cf_input = (Button) root.lookup("#bt_cf_input");
+		Button bt_yy_input = (Button) root.lookup("#bt_yy_input");
 		TextArea ta_input = (TextArea)root.lookup("#ta_input");
 		TextArea ta_grammar = (TextArea)root.lookup("#ta_grammar");
 		TextArea ta_yf_input = (TextArea)root.lookup("#ta_yf_input");
 		TextArea ta_cf_result = (TextArea)root.lookup("#ta_result");
+		TextArea ta_yy_input = (TextArea)root.lookup("#ta_yy_input");
+		TextArea ta_yy_grammar = (TextArea)root.lookup("#ta_yy_grammar");
+		TextArea ta_yy_sdt = (TextArea)root.lookup("#ta_yy_sdt");
 		
 		//词法分析读入文件
 		bt_cf_read_input.setOnAction(new EventHandler<ActionEvent>() {
@@ -102,6 +106,22 @@ public class MainApp extends Application{
 			public void handle(ActionEvent event) {
 				ta_yf_input.setText("Token:\n" + ta_cf_result.getText());
 //				System.out.println();
+			}
+		});
+		//语义分析读入源代码
+		bt_yy_input.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent event) {
+				ta_yy_input.setText(ta_input.getText());  //读取源代码
+				ta_yy_grammar.setText(ta_grammar.getText()); //读入语法
+//				FileChooser fileChooser = new FileChooser();
+//				File file = fileChooser.showOpenDialog(stage);
+//				if (file != null) {
+////					System.out.println(file.getPath());
+//					String content = readFile(file);
+//					ta_yy_sdt.setText(content);
+//				}
 			}
 		});
 	}

@@ -12,7 +12,7 @@ import ex2.Constant;
 
 public class SemanticAnalysis {
 
-	private static int offset = 0;
+	private static int offset = 0;	//空间分配偏移量
 	public static Map<String, SymbolTable> symbolTable = new LinkedHashMap<String, SymbolTable>(); // 符号表
 	private static Map<String, Declaration> declarMap = new LinkedHashMap<String, Declaration>(); // 记录声明语句中的属性
 	private static Map<String, Stack<String>> fuZhiMap = new LinkedHashMap<String, Stack<String>>(); // 记录赋值语句中的属性
@@ -21,10 +21,14 @@ public class SemanticAnalysis {
 	private static Map<String, Stack<Sentiment>> controlMap = new LinkedHashMap<String, Stack<Sentiment>>(); // 控制流语句中的属性
 	private static List<String> temp = new ArrayList<String>(); // 临时变量
 	public static List<Token> tokens = new ArrayList<Token>(); // 词法获得的token序列
-//	private static StringBuilder console = new StringBuilder(); // 控制台打印
+	private static StringBuilder console = new StringBuilder(); // 控制台打印
 	private static List<SiYuanShi> code = new ArrayList<SiYuanShi>(); // 四元式结果
 	private static int[] tokensArray;
 
+	/**主分析函数，根据产生式执行相应的语义动作
+	 * @param g
+	 * @param index
+	 */
 	public static void trans(String g, int index) {
 		if (g.equals("X->t")) { // 声明语句的翻译
 			Declaration declar = new Declaration("X", "integer", 4);
@@ -34,20 +38,37 @@ public class SemanticAnalysis {
 			declarMap.put("X", declar);
 		} else if (g.equals("D->Xi;")) {
 			String name = getSTName(index, 2);
-			symbolTable.get(name).setAttribute(declarMap.get("X").getType());
-			symbolTable.get(name).setAddress((offset + ""));
-			offset += declarMap.get("X").getWidth();
+			SymbolTable st = symbolTable.get(name);
+			if (st.getAttribute() == null) {
+				symbolTable.get(name).setAttribute(declarMap.get("X").getType());
+				symbolTable.get(name).setAddress((offset + ""));
+				offset += declarMap.get("X").getWidth();
+			} else { // 变量重复声明
+				Token token = getTokens(index, 2);
+				String error = String.format("Error at Line %d Col %d: re-declare(%s)\n", token.getRow(),
+						token.getCol(), name);
+				console.append(error);
+			}
 			setTokenArray(index, 2);
 		} else if (g.equals("S->i=E;")) { // 赋值语句的翻译
+			String E = fuZhiMap.get("E").pop();
 			String name = getSTName(index, 4);
 			int r = lookupSymbolTable(name);
-			if (r == -1) {
-				System.err.println("符号表无该标识符，未定义就使用");
-			} else {
-				genCode("=", fuZhiMap.get("E").pop(), "-", name);
-				setTokenArray(index, 3);
-				controlMap.get("S").push(new Sentiment());
+			if (r == -1 || symbolTable.get(name).getAttribute() == null) { // 变量引用前未声明
+				Token token = getTokens(index, 4);
+				String error = String.format("Error at Line %d Col %d: Not declare before reference(%s)\n",
+						token.getRow(), token.getCol(), name);
+				console.append(error);
+			} else if (symbolTable.get(name).getAttribute().equals("integer") && symbolTable.get(E).getAttribute().equals("real")) {
+				//检查赋值语句是否出现类型不匹配，比如real 赋给integer
+				Token token = getTokens(index, 4);
+				String error = String.format("Error at Line %d Col %d: Cannot convert from real to integer(%s)\n",
+						token.getRow(), token.getCol(), name);
+				console.append(error);
 			}
+			genCode("=", E, "-", name); // 错误处理策略：仅做错误提示，仍可继续分析
+			setTokenArray(index, 3);
+			controlMap.get("S").push(new Sentiment());
 		} else if (g.equals("E->E+T")) {
 			String E = fuZhiMap.get("E").pop();
 			String T = fuZhiMap.get("T").pop();
@@ -76,11 +97,13 @@ public class SemanticAnalysis {
 		} else if (g.equals("F->i")) {
 			String name = getSTName(index, 1);
 			int r = lookupSymbolTable(name);
-			if (r == -1) {
-				System.err.println("符号表无该标识符，未定义就使用");
-			} else {
-				fuZhiMap.get("F").push(name);
+			if (r == -1 || symbolTable.get(name).getAttribute() == null) { // 变量引用前未声明
+				Token token = getTokens(index, 1);
+				String error = String.format("Error at Line %d Col %d: Not declare before reference(%s)\n",
+						token.getRow(), token.getCol(), name);
+				console.append(error);
 			}
+			fuZhiMap.get("F").push(name); // 错误处理策略：仅做错误提示，仍可继续分析
 		} else if (g.equals("C->a")) { // 布尔表达式的翻译
 			BoolExpression C = new BoolExpression();
 			C.setTrueList(makeList(nextQuad()));
@@ -183,7 +206,7 @@ public class SemanticAnalysis {
 		for (int i = 0; i < boolN.length; i++) {
 			boolMap.put(boolN[i], new Stack<BoolExpression>());
 		}
-		String[] controlN = new String[] { "S", "N", "P"};
+		String[] controlN = new String[] { "S", "N", "P" };
 		for (int i = 0; i < controlN.length; i++) {
 			controlMap.put(controlN[i], new Stack<Sentiment>());
 		}
@@ -238,11 +261,11 @@ public class SemanticAnalysis {
 		String t = "t" + (temp.size() + 1);
 		temp.add(t);
 		if (type == Constant.zbm.indexOf("uint")) {
-			SymbolTable st = new SymbolTable(symbolTable.size() + 1 + "", t, "临时变量", "integer", field, offset + "", "");
+			SymbolTable st = new SymbolTable(symbolTable.size() + 1 + "", t, "常数", "integer", field, offset + "", "");
 			symbolTable.put(t, st);
 			offset += 4;
 		} else {
-			SymbolTable st = new SymbolTable(symbolTable.size() + 1 + "", t, "临时变量", "real", field, offset + "", "");
+			SymbolTable st = new SymbolTable(symbolTable.size() + 1 + "", t, "常数", "real", field, offset + "", "");
 			symbolTable.put(t, st);
 			offset += 8;
 		}
@@ -297,12 +320,8 @@ public class SemanticAnalysis {
 	 * @return
 	 */
 	public static String getSTName(int index, int before) {
-		while (before > 0) {
-			if (tokensArray[--index] == 0) {
-				before--;
-			}
-		}
-		String field = tokens.get(index).getField(); // (1, STIndex: 1)
+		Token token = getTokens(index, before);
+		String field = token.getField(); // (1, STIndex: 1)
 		return field.substring(field.indexOf(":") + 2);
 	}
 
@@ -392,5 +411,16 @@ public class SemanticAnalysis {
 	 */
 	public static void clear() {
 		SemanticAnalysis.code.clear();
+		SemanticAnalysis.console.delete(0, console.length());
+		SemanticAnalysis.offset = 0;
+	}
+
+	/**
+	 * 返回控制台信息
+	 * 
+	 * @return
+	 */
+	public static String getConsole() {
+		return console.toString();
 	}
 }
