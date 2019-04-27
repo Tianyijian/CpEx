@@ -43,7 +43,7 @@ public class LexicalAnalysis {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String filename = "src/main/java/ex1/cftest.txt";
+		String filename = "src/main/java/ex1/test1.txt";
 		new LexicalAnalysis().scan(filename);
 
 	}
@@ -121,6 +121,9 @@ public class LexicalAnalysis {
 			} else {
 				break;
 			}
+			if (index >= content.length()) {
+				break;
+			}
 			ch = content.charAt(index);
 		}
 		Token token = new Token(zbm.indexOf(word.toString()), "0", lineNum.size() + 1, getColNumByIndex(index)- word.length() +1);
@@ -167,6 +170,9 @@ public class LexicalAnalysis {
 				word.append(ch);
 				index++;
 			} else {
+				break;
+			}
+			if (index >= content.length()) {
 				break;
 			}
 			ch = content.charAt(index);
