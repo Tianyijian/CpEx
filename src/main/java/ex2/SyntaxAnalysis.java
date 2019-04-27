@@ -762,7 +762,8 @@ public class SyntaxAnalysis {
 		sa.getSTA();
 //		sa.clearConsole();
 //		sa.run("ti;ri;i=d;i=d;f(ijdya)gi=i*d+d;ei=i*(i+d);w(imd)vi=i+d;");
-		sa.run("i=i+i*i;");
+//		sa.run("i=i+i*i;");
+		sa.run("ti;ti;ti;ti;ti;ti;ti;wi<ivfi<igi=i+i;ei=i-i;");
 		sa.printList();
 	}
 }

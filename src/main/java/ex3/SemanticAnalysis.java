@@ -18,6 +18,7 @@ public class SemanticAnalysis {
 	private static Map<String, Stack<String>> fuZhiMap = new LinkedHashMap<String, Stack<String>>(); // 记录赋值语句中的属性
 	private static Map<String, Stack<BoolExpression>> boolMap = new LinkedHashMap<String, Stack<BoolExpression>>(); // 记录布尔表达式的属性
 	private static Stack<Integer> mStack = new Stack<Integer>(); // 布尔表达式中的 M
+	private static Map<String, Stack<Sentiment>> controlMap = new LinkedHashMap<String, Stack<Sentiment>>(); // 控制流语句中的属性
 	private static List<String> temp = new ArrayList<String>(); // 临时变量
 	public static List<Token> tokens = new ArrayList<Token>(); // 词法获得的token序列
 //	private static StringBuilder console = new StringBuilder(); // 控制台打印
@@ -45,6 +46,7 @@ public class SemanticAnalysis {
 			} else {
 				genCode("=", fuZhiMap.get("E").pop(), "-", name);
 				setTokenArray(index, 3);
+				controlMap.get("S").push(new Sentiment());
 			}
 		} else if (g.equals("E->E+T")) {
 			String E = fuZhiMap.get("E").pop();
@@ -81,12 +83,12 @@ public class SemanticAnalysis {
 			}
 		} else if (g.equals("C->a")) { // 布尔表达式的翻译
 			BoolExpression C = new BoolExpression();
-			C.setTrueList(makeList(code.size()));
+			C.setTrueList(makeList(nextQuad()));
 			boolMap.get("C").push(C);
 			genCode("j", "-", "-", "-");
 		} else if (g.equals("C->b")) {
 			BoolExpression C = new BoolExpression();
-			C.setFalseList(makeList(code.size()));
+			C.setFalseList(makeList(nextQuad()));
 			boolMap.get("C").push(C);
 			genCode("j", "-", "-", "-");
 		} else if (g.equals("C->(B)")) {
@@ -101,8 +103,8 @@ public class SemanticAnalysis {
 			setTokenArray(index, 1);
 		} else if (g.equals("C->ERE")) {
 			BoolExpression C = new BoolExpression();
-			C.setTrueList(makeList(code.size()));
-			C.setFalseList(makeList(code.size() + 1));
+			C.setTrueList(makeList(nextQuad()));
+			C.setFalseList(makeList(nextQuad() + 1));
 			String e2addr = fuZhiMap.get("E").pop();
 			String e1addr = fuZhiMap.get("E").pop();
 			boolMap.get("C").push(C);
@@ -137,7 +139,38 @@ public class SemanticAnalysis {
 			boolMap.get("A").push(A);
 			setTokenArray(index, 2);
 		} else if (g.equals("M->ε")) {
-			mStack.push(code.size());
+			mStack.push(nextQuad());
+		} else if (g.equals("S->fBgMSNeMS")) { // 控制流语句的回填
+			Sentiment S = new Sentiment();
+			Sentiment S2 = controlMap.get("S").pop();
+			Sentiment S1 = controlMap.get("S").pop();
+			Sentiment N = controlMap.get("N").pop();
+			Integer M2 = mStack.pop();
+			Integer M1 = mStack.pop();
+			BoolExpression B = boolMap.get("B").pop();
+			backPactch(B.getTrueList(), M1);
+			backPactch(B.getFalseList(), M2);
+			S.setNextList(merge(merge(S1.getNextList(), N.getNextList()), S2.getNextList()));
+			controlMap.get("S").push(S);
+			setTokenArray(index, 5);
+		} else if (g.equals("S->wMBvMS")) {
+			Sentiment S = new Sentiment();
+			Integer M2 = mStack.pop();
+			Integer M1 = mStack.pop();
+			BoolExpression B = boolMap.get("B").pop();
+			backPactch(controlMap.get("S").pop().getNextList(), M1);
+			backPactch(B.getTrueList(), M2);
+			S.setNextList(B.getFalseList());
+			genCode("j", "-", "-", M1 + "");
+			controlMap.get("S").push(S);
+			setTokenArray(index, 3);
+		} else if (g.equals("N->ε")) {
+			Sentiment N = new Sentiment();
+			N.setNextList(makeList(nextQuad()));
+			genCode("j", "-", "-", "-");
+			controlMap.get("N").push(N);
+		} else if (g.equals("")) {
+
 		}
 	}
 
@@ -149,6 +182,10 @@ public class SemanticAnalysis {
 		String[] boolN = new String[] { "B", "A", "C" };
 		for (int i = 0; i < boolN.length; i++) {
 			boolMap.put(boolN[i], new Stack<BoolExpression>());
+		}
+		String[] controlN = new String[] { "S", "N" };
+		for (int i = 0; i < controlN.length; i++) {
+			controlMap.put(controlN[i], new Stack<Sentiment>());
 		}
 	}
 
@@ -186,7 +223,7 @@ public class SemanticAnalysis {
 	 */
 	private static void backPactch(List<Integer> list, Integer i) {
 		for (int j = 0; j < list.size(); j++) {
-			code.get(list.get(j)).setResult(i + "");
+			code.get(list.get(j) - 1).setResult(i + "");
 		}
 	}
 
@@ -235,12 +272,21 @@ public class SemanticAnalysis {
 	}
 
 	/**
+	 * 返回下一个代码式标号
+	 * 
+	 * @return
+	 */
+	public static int nextQuad() {
+		return code.size() + 1;
+	}
+
+	/**
 	 * 生成三地址指令
 	 * 
 	 * @param code
 	 */
 	public static void genCode(String op, String arg1, String arg2, String result) {
-		SiYuanShi s = new SiYuanShi(op, arg1, arg2, result);
+		SiYuanShi s = new SiYuanShi(nextQuad(), op, arg1, arg2, result);
 		code.add(s);
 	}
 

@@ -2,6 +2,7 @@ package ex3;
 
 public class SiYuanShi {
 
+	private int index;
 	private String op;
 	private String arg1;
 	private String arg2;
@@ -11,8 +12,10 @@ public class SiYuanShi {
 	public SiYuanShi() {
 		super();
 	}
-	public SiYuanShi(String op, String arg1, String arg2, String result) {
+	
+	public SiYuanShi(int index, String op, String arg1, String arg2, String result) {
 		super();
+		this.index = index;
 		this.op = op;
 		this.arg1 = arg1;
 		this.arg2 = arg2;
@@ -45,7 +48,7 @@ public class SiYuanShi {
 	}
 	@Override
 	public String toString() {
-		return "(" + op + ",\t" + arg1 + ",\t" + arg2 + ",\t" + result + ")";
+		return index + ":\t(" + op + ",\t" + arg1 + ",\t" + arg2 + ",\t" + result + ")";
 	}
 	
 	

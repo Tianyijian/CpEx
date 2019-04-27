@@ -1,4 +1,4 @@
-P -> D P | S P | ε
+P -> D P | S P | ε | B
 
 D -> X id ;
 X -> integer | real
@@ -10,9 +10,11 @@ F -> ( E )
 F -> digit
 F -> id
 
-S -> if B then S else S
-S -> while B do S
-B -> B or A | A
-A -> A and C | C
+S -> if B then M S N else M S
+S -> while M B do M S
+B -> B or M A | A
+A -> A and M C | C
 C -> not C | ( B ) | E relop E | true | false    
 relop -> < | <= | == | != | > | >= 
+M -> ε
+N -> ε
